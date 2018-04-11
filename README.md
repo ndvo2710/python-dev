@@ -33,5 +33,5 @@
 * 构建一个django项目
 * url，view，template
 * 实现一个hello world
-* module
+* model
 
