@@ -90,6 +90,7 @@ def change_record(name):
 if __name__ == "__main__":
     while True:
         menu = """
+        通讯录
         1. 添加
         2. 查找
         3. 删除

@@ -131,6 +131,150 @@ git merge dev
 #### 9. 推送到远程
 右键->git->Repository->push
 
+## 三、 回顾python基础
+编写一个通讯录程序，实现增删改查功能
+#### 1.设计数据结构
+一条记录： 姓名，电话， id
+一个通讯录：列表，里面元素为记录
+
+#### 2. 函数设计
+* 增加 add_record
+* 查询 query_record
+* 修改 change_record
+* 删除 delete_record
+
+#### 3. 菜单设计
+* main函数
+* while 循环
+* 选择相应功能
+示例
+````
+
+        通讯录
+        1. 添加
+        2. 查找
+        3. 删除
+        4. 修改
+        5. 退出
+        
+请选择操作:1
+请输入姓名:jia
+请输入电话:123
+添加成功
+
+        通讯录
+        1. 添加
+        2. 查找
+        3. 删除
+        4. 修改
+        5. 退出
+        
+请选择操作:
+````
+
+
+## 四、使用面向对象实现该通讯录
+#### 1.设计数据结构
+* 记录类 Record
+* 通讯录类 PhoneBook
+
+#### 2. 类方法设计
+* Record __init__、 set_number
+* PhoneBook __init__、add_record、query_record、change_record、delete_record
+#### 3. 菜单设计不变
+
+## 五、 python对象序列化pickle
+pickle模块是一种的对象序列化工具；对于内存中几乎任何的python对象，都能把对象转化为字节串，
+这个字节串可以随后用来在内存中重建最初的对象。pickle模块能够处理我们用的任何对象，列表，字典
+嵌套组合以及类和实例
+
+#### 1. dumps和 loads
+列表对象
+````
+>>> import pickle
+>>> l = [1,2,3]
+>>> pickle.dumps(l)
+b'\x80\x03]q\x00(K\x01K\x02K\x03e.'
+>>> b = pickle.dumps(l)
+>>> b
+b'\x80\x03]q\x00(K\x01K\x02K\x03e.'
+>>> pickle.loads(b)
+````
+
+字典对象
+````
+>>> d = {"id":1, "name": "贾敏强", "phone_number":"15801396646"}
+>>> pickle.dumps(d)
+b'\x80\x03}q\x00(X\x02\x00\x00\x00idq\x01K\x01X\x04\x00\x00\x00nameq\x02X\t\x00\x00\x00\xe8\xb4\xbe\xe6\x95\x8f\xe5\xbc\xbaq\x03X\x0c\x00\x00\x00phone_numberq\x04X\x0b\x00\x00\x0015801396646q\x05u.'
+>>> b = pickle.dumps(d)
+>>> pickle.loads(b)
+{'id': 1, 'name': '贾敏强', 'phone_number': '15801396646'}
+````
+
+类和实例
+````
+import pickle
+
+
+class Record:
+    def __init__(self, name, phone_number):
+        self.name = name
+        self.phone_number = phone_number
+
+
+R = pickle.dumps(Record)
+print(R)
+print(pickle.loads(R))
+
+record = Record("贾敏强", "15801396646")
+r = pickle.dumps(record)
+print(r)
+print(pickle.loads(r))
+````
+
+#### 2. dump 和load
+````
+import pickle
+
+L = [1, 2, 3]
+with open("d://L.dat", "wb") as f:
+    pickle.dump(L, f)
+with open("d://L.dat", "rb") as f:
+    print(pickle.load(f))
+
+
+class Record:
+    def __init__(self, name, phone_number):
+        self.name = name
+        self.phone_number = phone_number
+
+
+with open("d:/Record.dat", "wb") as f:
+    pickle.dump(Record, f)
+with open("d:/Record.dat", "rb") as f:
+    print(pickle.load(f))
+
+record = Record("贾敏强", "15801396646")
+with open("d:/record.dat", "wb") as f:
+    pickle.dump(record, f)
+with open("d:/record.dat", "rb") as f:
+    print(pickle.load(f))
+
+
+records = []
+records.append(record)
+with open("d:/records.dat", "wb") as f:
+    pickle.dump(records, f)
+
+with open("d:/records.dat", "rb") as f:
+    print(pickle.load(f))
+
+````
+
+## 六、 练习
+#### 1. 使用json将通讯录（函数）序列化
+#### 2. 使用pickle将通讯录（面向对象）序列化
+
 
 
 
