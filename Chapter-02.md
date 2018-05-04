@@ -194,3 +194,110 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 StopIteration
 ````
+使用类定义迭代器，斐波那契数
+
+````
+class Fibs:
+    def __init__(self):
+        self.a = 0
+        self.b = 1
+
+    def __next__(self):
+        self.a, self.b = self.b, self.a + self.b
+        return self.a
+
+    def __iter__(self):
+        return self
+
+
+fibs =Fibs()
+
+for f in fibs:
+    if f > 1000:
+        print(f)
+        break
+````
+
+### 生成器
+1. 生成器函数
+生成器是一种用函数语法定义的迭代器; 调用生成器函数返回一个迭代器
+yield语句挂起生成器函数并向调用者发送一个值，迭代器的_next__继续运行函数
+
+````
+L = [[1, 2],[3, 4],[5,]]
+def flat(L):
+    for sublist in L:
+        for e in sublist:
+            yield e
+
+for num in flat(L):
+    print(num)
+````
+
+生成器send方法
+
+````
+def gen():
+    for i in range(10):
+        x = (yield i)
+        print(x)
+
+g = gen()
+next(g)
+print(g.send(11))
+print(g.send(22))
+````
+生成器函数执行到yield 时就会暂停，执行send收继续运行到下一次循环yield时再暂停，send的值付给x
+
+2. 生成器表达式
+````
+>>> f = ( x ** 2 for x in range(4))
+>>> next(f)
+0
+>>> next(f)
+1
+>>> next(f)
+4
+>>> next(f)
+9
+````
+
+
+### os 和os.path
+
+os 模块
+1.  返回当前目录
+`os.getcwd()`
+2.  列出目录的内容
+` os.listdir()`
+3. 创建目录
+`os.mkdir("te")`
+4.  删除空目录
+`os.rmdir("te")`
+5. 重命名
+`os.rename('1.py','2.py')`
+6.  删除文件
+`os.remove('2.py')`
+7. 执行系统命令
+`os.system("dir")`
+8. 退出程序
+`os._exit(0)`
+
+os.path 模块
+1. abspath()  将相对路径转化为绝对路径
+`os.path.abspath(path)`
+2.  dirname()  获取完整路径当中的目录部分
+`os.path.dirname("d:/1/test")`
+3.  basename()获取完整路径当中的主体部分
+`os.path.basename("d:/1/test")`
+4.  split() 将一个完整的路径切割成目录部分和主体部分
+`os.path.split("d:/1/test")`
+5.  join() 将2个路径合并成一个
+`os.path.join("d:/1", "test")`
+6.  getsize()  获取文件的大小
+`os.path.getsize(path)`
+7.  isfile() 检测是否是文件
+`os.path.isfile(path)`
+8. i sdir()  检测是否是文件夹
+`os.path.isdir(path)`
+
