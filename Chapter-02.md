@@ -282,22 +282,51 @@ os 模块
 `os.system("dir")`
 8. 退出程序
 `os._exit(0)`
+9. 遍历目录中的所有文件
+`os.walk` 返回一个3元组生成器
+当前目录的名称，当前目录中子目录的列表，当前目录中文件的列表
+````
+import os
+
+g = os.walk("d:/py/peixun/python-dev")
+print(next(g))
+print(next(g))
+````
+
 
 os.path 模块
 1. abspath()  将相对路径转化为绝对路径
 `os.path.abspath(path)`
-2.  dirname()  获取完整路径当中的目录部分
+2. dirname()  获取完整路径当中的目录部分
 `os.path.dirname("d:/1/test")`
-3.  basename()获取完整路径当中的主体部分
+3. basename()获取完整路径当中的主体部分
 `os.path.basename("d:/1/test")`
-4.  split() 将一个完整的路径切割成目录部分和主体部分
+4. split() 将一个完整的路径切割成目录部分和主体部分
 `os.path.split("d:/1/test")`
-5.  join() 将2个路径合并成一个
+5. join() 将2个路径合并成一个
 `os.path.join("d:/1", "test")`
-6.  getsize()  获取文件的大小
+6. getsize()  获取文件的大小
 `os.path.getsize(path)`
-7.  isfile() 检测是否是文件
+7. isfile() 检测是否是文件
 `os.path.isfile(path)`
-8. i sdir()  检测是否是文件夹
+8. isdir()  检测是否是文件夹
 `os.path.isdir(path)`
 
+列出目录下包括子目录的所有文件
+````
+import os
+
+for dirpath, dirames, filenames  in os.walk("d:/py/peixun/python-dev"):
+    print('[' + dirpath + ']')
+    for filename in filenames:
+        print(os.path.join(dirpath, filename))
+````
+
+### 练习
+* 递归函数列出所有文件 使用os.listdir os.isfile
+* 练习找出单个目录中的最大文件
+* 练习找出目录树中的最大文件
+
+
+###  作业
+复制目录数,拷贝目录a到a.bak
