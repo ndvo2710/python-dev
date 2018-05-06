@@ -35,7 +35,7 @@ if __name__ == "__main__":
 ````
 
 练习：取出n层嵌套列表里的所有元素
-提示判断一个元素i是否是list 使用sinstance(i,list)函数
+提示判断一个元素i是否是list 使用isinstance(i,list)函数
 
 ## 闭包
 ````
@@ -95,6 +95,24 @@ if __name__ == "__main__":
     target()
 
 ````
+等效
+````
+def deco(func):
+    def inner():
+        print("running inner()")
+    return inner
+
+
+def target():
+    print('running target()')
+
+
+if __name__ == "__main__":
+    target = deco(target)
+    target()
+
+````
+
 
 它可以让被装饰的函数在不需要做任何代码变动的前提下增加额外的功能，
 被装饰的函数当作参数传入，装饰器返回经过修饰后函数的名字；

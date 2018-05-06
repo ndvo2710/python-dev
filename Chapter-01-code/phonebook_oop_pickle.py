@@ -104,10 +104,11 @@ if __name__ == "__main__":
     phonebook = PhoneBook()
     try:
         phonebook.load()
+        Record.global_id = phonebook.data[-1].record_id
     except Exception:
         print("数据文件不存在")
 
-    Record.global_id = phonebook.data[-1].record_id
+
 
     while True:
         menu = """
