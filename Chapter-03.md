@@ -182,3 +182,188 @@ for t in threads:
 
 print(HelloWorld.count)
 ````
+
+加锁
+````
+import threading, time
+
+
+class HelloWorld(threading.Thread):
+    count = 0
+    addlock = threading.Lock()
+    def run(self):
+        with HelloWorld.addlock:
+            HelloWorld.count += 1
+        time.sleep(0.5)
+        with HelloWorld.addlock:
+            HelloWorld.count += 1
+
+threads = []
+for i in range(5):
+    t = HelloWorld()
+    t.start()
+    threads.append(t)
+
+for t in threads:
+    t.join()
+
+print(HelloWorld.count)
+````
+
+### queue 模块
+
+实际上带有线程的程序通常由一系列生产者和消费者组成，它们通过将数据存入一个共享队列中或者从中取出来进行通信。
+
+````
+import threading, queue
+import time
+
+
+numconsumers = 2
+numproducers = 2
+nummessages = 4
+
+lock = threading.Lock()
+dataQueue = queue.Queue()
+
+
+def producer(idnum):
+    for msgnum in range(nummessages):
+        dataQueue.put("producer id=%d, count=%d" % (idnum, msgnum))
+
+
+def consumer(idnum):
+    while not dataQueue.empty():
+        data = dataQueue.get(block=False)
+        with lock:
+            print("consumer", idnum, "got => ", data)
+        time.sleep(0.1)
+
+if __name__ == "__main__":
+    consumerThreads = []
+    producerThreads = []
+    for i in  range(numproducers):
+        t = threading.Thread(target=producer, args=(i,))
+        producerThreads.append(t)
+        t.start()
+    for i in range(numconsumers):
+        t = threading.Thread(target=consumer, args=(i,))
+        consumerThreads.append(t)
+        t.start()
+    for t in producerThreads:
+        t.join()
+    for t in consumerThreads:
+        t.join()
+````
+
+类
+````
+import threading, queue
+import time
+
+
+numconsumers = 2
+numproducers = 2
+nummessages = 4
+
+dataQueue = queue.Queue()
+
+
+class Producer(threading.Thread):
+    def __init__(self, idnum, nummessages):
+        self.idnum = idnum
+        self.nummessages = nummessages
+        super(Producer, self).__init__()
+
+
+    def run(self):
+        for msgnum in range(self.nummessages):
+            dataQueue.put("producer id=%d, count=%d" % (self.idnum, msgnum))
+
+
+class Consumer(threading.Thread):
+    lock = threading.Lock()
+    def __init__(self, idnum):
+        self.idnum = idnum
+        super(Consumer, self).__init__()
+
+    def run(self):
+        while not dataQueue.empty():
+            data = dataQueue.get(block=False)
+            with Consumer.lock:
+                print("consumer", self.idnum, "got => ", data)
+            time.sleep(0.1)
+
+if __name__ == "__main__":
+    consumerThreads = []
+    producerThreads = []
+    for i in  range(numproducers):
+        t = Producer(i, nummessages)
+        producerThreads.append(t)
+        t.start()
+    for i in range(numconsumers):
+        t = Consumer(i)
+        consumerThreads.append(t)
+        t.start()
+    for t in producerThreads:
+        t.join()
+    for t in consumerThreads:
+        t.join()
+````
+
+###  multiprocessing  模块
+多进程模块
+````
+import os
+
+from multiprocessing import Process, Lock
+
+def whoami(label, lock):
+    msg = '%s: name:%s, pid:%s'
+    with lock:
+        print(msg % (label, __name__,os.getpid()))
+
+
+if __name__ == '__main__':
+    lock = Lock()
+
+    for i in range(5):
+        p = Process(target=whoami, args=('child', lock))
+        p.start()
+````
+
+
+队列和子类
+
+````
+import time, queue
+from multiprocessing import Process, Queue, Lock
+
+
+class Consumer(Process):
+    lock = Lock()
+    def __init__(self, id, q):
+        self.id = id
+        self.post = q
+        super(Consumer,self).__init__()
+
+    def run(self):
+        flag = True
+        while flag:
+            try:
+                data = self.post.get(block=False)
+            except queue.Empty:
+                flag = False
+            with Consumer.lock:
+                print("process id: %d,data:%d" % (self.id, data))
+            time.sleep(0.1)
+
+if __name__ == '__main__':
+    q = Queue()
+    for i in range(10):
+        q.put(i)
+
+    for i in range(2):
+        c = Consumer(i, q)
+        c.start()
+````
