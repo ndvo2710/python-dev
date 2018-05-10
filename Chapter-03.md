@@ -311,6 +311,7 @@ if __name__ == "__main__":
         t.join()
 ````
 
+## 多进程
 ###  multiprocessing  模块
 多进程模块
 ````
@@ -366,4 +367,46 @@ if __name__ == '__main__':
     for i in range(2):
         c = Consumer(i, q)
         c.start()
+````
+
+##   协程
+协程，又成为微线程
+###  yield
+````
+def helloWorld(n):
+    while True:
+        p = yield
+        print("hello world %d: %d" % (n, p) )
+
+g1 = helloWorld(1)
+g2 = helloWorld(2)
+g3 = helloWorld(3)
+
+next(g1)
+next(g2)
+next(g3)
+for i in range(5):
+    g1.send(i)
+    g2.send(i)
+    g3.send(i)
+````
+
+分段累加
+````
+def addnum(start, end):
+    sum = 0
+    for i in range(start, end):
+        sum += i
+        print(sum)
+        yield
+
+
+g1 = addnum(1,51)
+g2 = addnum(51,101)
+
+next(g1)
+next(g2)
+for i in range(49):
+    g1.send(1)
+    g2.send(1)
 ````
