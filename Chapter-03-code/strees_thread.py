@@ -3,9 +3,9 @@ import requests, time
 
 start = time.time()
 
-count = 1000
-num = 1
-url = 'http://127.0.0.1'
+count = 100
+num = 2
+url = 'http://www.baidu.com'
 
 lock = threading.Lock()
 q = queue.Queue()
@@ -16,9 +16,9 @@ result = {}
 def get_content(url):
     while not q.empty():
         q.get(block=False)
+        r = requests.get(url)
         with lock:
             try:
-                r = requests.get(url)
                 result[r.status_code] = result.setdefault(r.status_code, 0) + 1
             except :
                 result["error"] = result.setdefault("error", 0) + 1

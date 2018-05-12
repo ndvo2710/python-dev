@@ -1,18 +1,8 @@
-from multiprocessing import Process, Queue,  Lock, Value
+from multiprocessing import Process, Queue,  Lock
 import requests, time, queue
 
-start = time.time()
-
-count = 100
-num = 2
-url = 'http://127.0.0.1'
-
-lock = Lock()
-q = Queue()
-processes = []
-result = {}
-
-def get_content(url):
+def get_content(url, q):
+    result = {}
     while True:
         try:
             q.get(block=False)
@@ -27,17 +17,30 @@ def get_content(url):
     for item in result:
         print("status_code[%s]: %d" % (item, result.get(item)))
 
-for i in range(count):
-    q.put(i)
 
-for i in range(num):
-    p = Process(target=get_content, args=(url,))
-    processes.append(p)
-    p.start()
+if __name__ == "__main__":
+    start = time.time()
 
-for p in processes:
-    p.join()
+    count = 100
+    num = 2
+    url = 'http://www.baidu.com'
 
-end = time.time()
-t = end - start
-print("time %d" %  t)
+    lock = Lock()
+    q = Queue()
+    processes = []
+
+
+    for i in range(count):
+        q.put(i)
+
+    for i in range(num):
+        p = Process(target=get_content, args=(url,q))
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join()
+
+    end = time.time()
+    t = end - start
+    print("time %d" % t)

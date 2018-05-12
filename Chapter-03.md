@@ -3,7 +3,7 @@
 线程是中轻量级的进程，所有线程均在同一个进程中，共享全局内存，用于任务并行
 ###  通过函数使用线程
 实例1
-````
+````buildoutcfg
 import threading
 import time
 
@@ -24,7 +24,7 @@ print("main thread")
 
 实例2 同种任务并行
 
-````
+````buildoutcfg
 import threading
 import time
 
@@ -42,7 +42,7 @@ print("main thread")
 
 实例3 线程间同步
 
-````
+````buildoutcfg
 import threading, time
 
 count = 0
@@ -66,7 +66,7 @@ print(count)
 ````
 
 加锁
-````
+````buildoutcfg
 import threading, time
 
 count = 0
@@ -95,7 +95,7 @@ print(count)
 ````
 使用with 加锁
 
-````
+````buildoutcfg
 import threading, time
 
 count = 0
@@ -125,7 +125,7 @@ print(count)
 
 实例1
 继承threading.Thread 重写run方法
-````
+````buildoutcfg
 import threading, time
 
 
@@ -141,7 +141,7 @@ print("main thread")
 ````
 
 实例2
-````
+````buildoutcfg
 import threading, time
 
 
@@ -160,7 +160,7 @@ print("main thread")
 ````
 
 实例3
-````
+````buildoutcfg
 import threading, time
 
 
@@ -184,7 +184,7 @@ print(HelloWorld.count)
 ````
 
 加锁
-````
+````buildoutcfg
 import threading, time
 
 
@@ -214,7 +214,7 @@ print(HelloWorld.count)
 
 实际上带有线程的程序通常由一系列生产者和消费者组成，它们通过将数据存入一个共享队列中或者从中取出来进行通信。
 
-````
+````buildoutcfg
 import threading, queue
 import time
 
@@ -257,7 +257,7 @@ if __name__ == "__main__":
 ````
 
 类
-````
+````buildoutcfg
 import threading, queue
 import time
 
@@ -314,7 +314,7 @@ if __name__ == "__main__":
 ## 多进程
 ###  multiprocessing  模块
 多进程模块
-````
+````buildoutcfg
 import os
 
 from multiprocessing import Process, Lock
@@ -336,7 +336,7 @@ if __name__ == '__main__':
 
 队列和子类
 
-````
+````buildoutcfg
 import time, queue
 from multiprocessing import Process, Queue, Lock
 
@@ -372,7 +372,7 @@ if __name__ == '__main__':
 ##   协程
 协程，又成为微线程
 ###  yield
-````
+````buildoutcfg
 def helloWorld(n):
     while True:
         p = yield
@@ -392,13 +392,14 @@ for i in range(5):
 ````
 
 分段累加
-````
+````buildoutcfg
 def addnum(start, end):
     sum = 0
     for i in range(start, end):
         sum += i
-        print(sum)
+        # print(sum)
         yield
+    return sum
 
 
 g1 = addnum(1,51)
@@ -406,7 +407,44 @@ g2 = addnum(51,101)
 
 next(g1)
 next(g2)
-for i in range(49):
-    g1.send(1)
-    g2.send(1)
+for i in range(50):
+    try:
+        g1.send(1)
+    except StopIteration as exc:
+        sum1 = exc.value
+    try:
+        g2.send(1)
+    except StopIteration as exc:
+        sum2 = exc.value
+print(sum1 + sum2)
+````
+
+### asyncio
+
+````buildoutcfg
+import asyncio
+
+async def hello_world():
+    print("Hello World!")
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(hello_world())
+loop.close()
+````
+
+分段累加
+````buildoutcfg
+import asyncio
+async def addnum(start, end):
+    sum = 0
+    for i in range(start, end):
+        sum += i
+    return sum
+
+
+loop = asyncio.get_event_loop()
+s1 = loop.run_until_complete(addnum(1,51))
+s2 = loop.run_until_complete(addnum(51,101))
+loop.close()
+print(s1+s2)
 ````
