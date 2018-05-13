@@ -310,7 +310,8 @@ if __name__ == "__main__":
     for t in consumerThreads:
         t.join()
 ````
-
+练习: 使用多线程写一个并发http，get请求的程序，
+可设置并发数和请求总数，返回请求状态码
 ## 多进程
 ###  multiprocessing  模块
 多进程模块
@@ -349,12 +350,11 @@ class Consumer(Process):
         super(Consumer,self).__init__()
 
     def run(self):
-        flag = True
-        while flag:
+        while True:
             try:
                 data = self.post.get(block=False)
             except queue.Empty:
-                flag = False
+                break
             with Consumer.lock:
                 print("process id: %d,data:%d" % (self.id, data))
             time.sleep(0.1)
@@ -448,3 +448,5 @@ s2 = loop.run_until_complete(addnum(51,101))
 loop.close()
 print(s1+s2)
 ````
+##作业
+使用多进程写一个并发http，get请求的程序， 可设置并发数和请求总数，返回请求状态码
