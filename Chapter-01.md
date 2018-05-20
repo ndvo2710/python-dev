@@ -65,6 +65,7 @@ git push -u origin master
 * 工作区
 * 暂存区
 * 已提交区
+
 工作区即当前目录，使用git add 命令后，文件被追踪，状态为在暂存；git commit后提交到仓库
 **只修改文件为执行git add**
 ````
