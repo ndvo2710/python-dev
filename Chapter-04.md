@@ -486,8 +486,17 @@ admin.site.register(Question)
 
 ````
 然后刷新浏览器页面，就可以看到Question
-![image]("./Chapter-04-code/pics/admin-1.jpg")
-点击Question
+![image](./Chapter-04-code/pics/admin-1.jpg)
+点击Question,现在你在“更改列表”页面。
+此页面显示数据库中的所有问题，并让你选择一个来更改
+![image](./Chapter-04-code/pics/admin-2.jpg)
+点击“What's up？”来编辑它
+![image](./Chapter-04-code/pics/admin-3.jpg)
+
++ 表单是从Question模型自动生成的
++ 不同的模型字段类型（DateTimeField，CharField）对应于相应的HTML输入小部件。
+每种类型的领域都知道如何在Django管理中显示自己
++ 
 
 
 
