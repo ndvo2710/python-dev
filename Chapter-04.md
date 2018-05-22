@@ -496,7 +496,7 @@ admin.site.register(Question)
 + 表单是从Question模型自动生成的
 + 不同的模型字段类型（DateTimeField，CharField）对应于相应的HTML输入小部件。
 每种类型的领域都知道如何在Django管理中显示自己
-+ 
+
 
 
 
