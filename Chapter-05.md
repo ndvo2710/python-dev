@@ -1,6 +1,21 @@
 # 第五天
 
-## 视图
+## myapp 视图概览
+在我们的投票应用程序中，我们将拥有以下四个视图
+
++ index页面 - 显示最新的几个问题
++ detail页面 - 显示问题，没有结果，但有选择的表单
++ result页面 - 显示特定问题的结果
++ vote 页面 - 对特定的问题的投票进行处理
+
+在Django中，网页和其他内容由视图传递，每个视图都由一个简单的Python函数（或基于类的视图的方法）表示
+Django将通过检查请求的URL（准确地说，域名后的URL部分）来选择一个视图。
+在网络上，您可能会遇到诸如此类的url“ME2/Sites/dirmod.asp?sid=&type=gen&mod=Core+Pages&gid=A6CD4967199A42D9B65B1B
+Django允许我们使用更优雅的方式
+URL，只是URL的一般形式 如/newsarchive/2018/06/.
+
+为了从URL获得视图，Django使用了'URLconf'（urls.py）。 
+URLconf将URL模式映射到视图
 
 ### 添加views
 现在让我们再添加一些视图到myapp/views.py。这些视图与我们第一index，略有不同
