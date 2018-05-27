@@ -108,7 +108,13 @@ views  视图文件
 
 编辑myapp/views.py
 ````
+from django.http import HttpResponse
 
+# Create your views here.
+
+
+def index(request):
+    return HttpResponse("Hello world,You're at myapp index")
 ````
 
 创建myapp/urls.py
@@ -497,7 +503,8 @@ admin.site.register(Question)
 + 不同的模型字段类型（DateTimeField，CharField）对应于相应的HTML输入小部件。
 每种类型的领域都知道如何在Django管理中显示自己
 
-
+作业： 大家把数据库换成mysql,创建数据库mysite,执行migrate，
+去查看mysql看是否建立对应表
 
 
 
