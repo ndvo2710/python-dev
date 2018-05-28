@@ -334,3 +334,91 @@ def results(request, question_id):
 
 <a href="{% url 'detail' question.id %}">Vote again?</a>
 ````
+
+
+### 通用视图
+detail(),results(),index()这些视图代表了基本Web开发的常见案例，
+根据URL中传递的参数从数据库获取数据，加载模板并返回呈现的模板。
+由于这很常见，Django提供了一个称为“通用视图”的功能
+
+我们将我们的投票应用程序转换为使用通用视图系统，以便我们可以删除一大堆我们自己的代码。 
+我们只需采取几个步骤即可完成转换。
+
++ 修改URLconf
++ 删除一些旧的不需要的视图
++ 基于Django通用视图引入新的视图
+
+修改URLconf
+````
+from django.urls import path
+
+from . import views
+
+app_name = 'polls'
+urlpatterns = [
+    path('', views.IndexView.as_view(), name='index'),
+    path('<int:pk>/', views.DetailView.as_view(), name='detail'),
+    path('<int:pk>/results/', views.ResultsView.as_view(), name='results'),
+    path('<int:question_id>/vote/', views.vote, name='vote'),
+]
+````
+
+修改view
+
+````
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.views import generic
+
+from .models import Choice, Question
+
+
+class IndexView(generic.ListView):
+    template_name = 'myapp/index.html'
+    context_object_name = 'latest_question_list'
+
+    def get_queryset(self):
+        """Return the last five published questions."""
+        return Question.objects.order_by('-pub_date')[:5]
+
+
+class DetailView(generic.DetailView):
+    model = Question
+    template_name = 'myapp/detail.html'
+
+
+class ResultsView(generic.DetailView):
+    model = Question
+    template_name = 'myapp/results.html'
+
+
+def vote(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        return render(request, 'myap/detail.html', {
+            'question': question,
+            'error_message': "You didn't select a choice.",
+        })
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse('results', args=(question.id,)))
+````
+
+我们在这里使用两个通用视图：ListView和DetailView。 这两个视图分别抽象出“显示对象列表”和“显示特定类型对象的详细页面”的概念
++ 每个通用视图都需要知道它将采取何种model。 这是使用model属性提供的
++ 他DetailView通用视图期望从URL捕获的主键值被称为“pk”，所以我们已经改变了通用视图的question_id为pk。
+
+
+默认情况下，DetailView通用视图使用名为<app name>/<model name> _detail.html的模板。 
+在我们的例子中，它会使用模板“myapp/question_detail.html”.template_name属性用于告诉Django使用特定的模板名称而不是自动生成的默认模板名称。
+在前面的例子，模板已经提供了一个包含question和latest_question_list上下文变量的上下文。
+对于DetailView，问题变量是自动提供的 - 由于我们使用Django 的model（Question），Django能够为上下文变量确定合适的名称
+但是，对于ListView，自动生成的上下文变量是question_list。为了覆盖这个，我们提供context_object_name属性，指定我们想用latest_question_list来代替。
