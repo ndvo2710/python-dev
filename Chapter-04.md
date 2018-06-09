@@ -506,6 +506,28 @@ admin.site.register(Question)
 作业： 大家把数据库换成mysql,创建数据库mysite,执行migrate，
 去查看mysql看是否建立对应表
 
+创建mysite数据库
+
+配置settings.py 
+````
+DATABASES = {
+    'default': {
+       # 'ENGINE': 'django.db.backends.sqlite3',
+       # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mysite',
+        'USER': 'root',
+        'PASSWORD': '123456',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    }
+}
+````
+执行migrate
+启动开发服务器
+
+
+
 
 
 
