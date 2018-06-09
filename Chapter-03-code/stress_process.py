@@ -25,7 +25,7 @@ if __name__ == "__main__":
     num = 2
     url = 'http://www.baidu.com'
 
-    lock = Lock()
+
     q = Queue()
     processes = []
 
