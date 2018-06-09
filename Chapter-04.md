@@ -507,7 +507,7 @@ admin.site.register(Question)
 去查看mysql看是否建立对应表
 
 创建mysite数据库
-
+安装mysqlconnect模块
 配置settings.py 
 ````
 DATABASES = {
@@ -524,6 +524,7 @@ DATABASES = {
 }
 ````
 执行migrate
+执行 createsuperuser
 启动开发服务器
 
 
