@@ -355,7 +355,7 @@ from django.urls import path
 
 from . import views
 
-app_name = 'polls'
+
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('<int:pk>/', views.DetailView.as_view(), name='detail'),
@@ -415,7 +415,7 @@ def vote(request, question_id):
 
 我们在这里使用两个通用视图：ListView和DetailView。 这两个视图分别抽象出“显示对象列表”和“显示特定类型对象的详细页面”的概念
 + 每个通用视图都需要知道它将采取何种model。 这是使用model属性提供的
-+ 他DetailView通用视图期望从URL捕获的主键值被称为“pk”，所以我们已经改变了通用视图的question_id为pk。
++ DetailView通用视图期望从URL捕获的主键值被称为“pk”，所以我们已经改变了通用视图的question_id为pk。
 
 
 默认情况下，DetailView通用视图使用名为<app name>/<model name> _detail.html的模板。 
