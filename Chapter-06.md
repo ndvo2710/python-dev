@@ -19,9 +19,11 @@ HTML 标记标签通常被称为 HTML 标签 (HTML tag)
 浏览器不会显示 HTML 标签，而是使用标签来解释页面的内容：
 ````buildoutcfg
 <html>
+<head>
 <title>
 我是title
 </title>
+</head>
 <body>
 
 <h1>我的第一个标题</h1>
@@ -425,7 +427,7 @@ select 元素（下拉列表）
 <select name="cars">
 <option value="volvo">Volvo</option>
 <option value="saab">Saab</option>
-<option value="<option value="fiat" selected>Fiat</option>fiat">Fiat</option>
+<option value="fiat" selected>Fiat</option>
 <option value="audi">Audi</option>
 </select>
 ````
