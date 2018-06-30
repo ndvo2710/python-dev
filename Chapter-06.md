@@ -54,7 +54,7 @@ HTML 标记标签通常被称为 HTML 标签 (HTML tag)
 
 #### html 标题
 
-HTML 标题（Heading）是通过 <h1> - <h6> 等标签进行定义的。
+HTML 标题（Heading）是通过\<h1\> - \<h6\> 等标签进行定义的。
 
 ````buildoutcfg
 <h1>This is a heading</h1>
@@ -96,7 +96,7 @@ HTML 文档是由 HTML 元素定义的，HTML 元素指的是从开始标签（s
 </body>
 </html>
 ````
-<html>和</html>之间是html元素，<head>和</head> 之间是head元素，可以看到元素是可以嵌套的
+\<html\>和\</html\>之间是html元素，\<head\>和\</head\> 之间是head元素，可以看到元素是可以嵌套的
 
 #### HTML 属性
 HTML 标签可以拥有属性。属性提供了有关 HTML 元素的更多的信息。
@@ -126,7 +126,7 @@ HTML 标签可以拥有属性。属性提供了有关 HTML 元素的更多的信
 
 
 #### HTML 折行
-在不产生新段落的情况下换行<br/>
+在不产生新段落的情况下换行\<br/\>
 ````buildoutcfg
 <p>This is<br />a para<br />graph with line breaks</p>
 ````
@@ -161,7 +161,7 @@ font-size 字体大小font-size 字体大小
 <h1 style="text-align:center">This is a heading</h1>
 <p>The heading above is aligned to the center of this page.</p>
 ````
-与<h1 align="center">对齐范式</h1> 效果相同
+与\<h1 align="center"\>对齐范式\</h1\> 效果相同
 
 
 #### HTML 注释标签
@@ -180,7 +180,7 @@ font-size 字体大小font-size 字体大小
 ````
 #### 列表
 有序列表是一列项目，列表项目使用数字进行标记。
-有序列表始于 <ol> 标签。每个列表项始于 <li> 标签。
+有序列表始于 \<ol\> 标签。每个列表项始于 \<li\> 标签。
 
 ````buildoutcfg
 <ol>
@@ -323,7 +323,7 @@ font-size 字体大小font-size 字体大小
 
 #### 表格
 
-表格由 <table> 标签来定义。每个表格均有若干行（由 <tr> 标签定义），每行被分割为若干单元格（由 <td> 标签定义）。
+表格由 \<table\> 标签来定义。每个表格均有若干行（由\<tr\> 标签定义），每行被分割为若干单元格（由 <td> 标签定义）。
 字母 td 指表格数据（table data），即数据单元格的内容。
 数据单元格可以包含文本、图片、列表、段落、表单、水平线、表格等等。
 
@@ -345,7 +345,7 @@ border 边框属性
 使用边框属性来显示一个带有边框的表格
 
 表格的表头
-表格的表头使用 <th> 标签进行定义。
+表格的表头使用 \<th\> 标签进行定义。
 
 ````buildoutcfg
 <table border="1">
@@ -369,9 +369,11 @@ HTML 表单用于搜集不同类型的用户输入
 HTML 表单包含表单元素。
 表单元素指的是不同类型的 input 元素、复选框、单选按钮、提交按钮等等
 
-<input> 元素
-<input> 元素是最重要的表单元素。
-<input> 元素有很多形态，根据不同的 type 属性
+\<input\> 元素
+
+\<input\> 元素是最重要的表单元素
+
+\<input\> 元素有很多形态，根据不同的 type 属性
 text     定义常规文本输入
 radio	 定义单选按钮输入（选择多个选择之一）
 submit	 定义提交按钮（提交表单）
@@ -389,7 +391,7 @@ submit	 定义提交按钮（提交表单）
 表单本身并不可见。还要注意文本字段的默认宽度是 20 个字符
 
 
-<input type="radio"> 定义单选按钮。
+\<input type="radio"\> 定义单选按钮。
 单选按钮允许用户在有限数量的选项中选择其中之一：
 
 ```buildoutcfg
@@ -400,7 +402,7 @@ submit	 定义提交按钮（提交表单）
 </form> 
 ```
 
-<input type="submit"> 定义用于向表单处理程序（form-handler）提交表单的按钮。
+\<input type="submit"\> 定义用于向表单处理程序（form-handler）提交表单的按钮。
 表单处理程序通常是包含用来处理输入数据的脚本的服务器页面。
 表单处理程序在表单的 action 属性中指定：
 
@@ -436,7 +438,7 @@ select 元素（下拉列表）
 <option value="audi">Audi</option>
 </select>
 ````
-<option> 元素定义待选择的选项。
+\<option\> 元素定义待选择的选项。
 列表通常会把首个选项显示为被选选项。
 能够通过添加 selected 属性来定义预定义选项
 
@@ -447,7 +449,7 @@ The cat was playing in the garden.
 </textarea>
 ````
 
-<button> 元素定义可点击的按钮
+\<button\> 元素定义可点击的按钮
 ````
 <button type="button" onclick="alert('Hello World!')">Click Me!</button>
 ````
