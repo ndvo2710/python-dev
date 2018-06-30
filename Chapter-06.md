@@ -39,12 +39,17 @@ HTML 标记标签通常被称为 HTML 标签 (HTML tag)
 <meta charset=utf-8" />
 ````
 
-<html> 与 </html> 之间的文本描述网页
-<head> 与  </head>之间用来定义文档的头部，它是头部所有标签的容器
-<title> 与 </title>之间用来定义文档在浏览器标签上显示的标题
-<body> 与 </body> 之间的文本是可见的页面内容
-<h1> 与 </h1> 之间的文本定义文档内的标题
-<p> 与 </p> 之间的文本被显示为段落
+\<html\> 与 \</html\> 之间的文本描述网页
+
+\<head\> 与 \</head\>之间用来定义文档的头部，它是头部所有标签的容器
+
+\<title\> 与 \</title\>之间用来定义文档在浏览器标签上显示的标题
+
+\<body\> 与 \</body\> 之间的文本是可见的页面内容
+
+\<h1\> 与\</h1\> 之间的文本定义文档内的标题
+
+\<p\> 与\</p\> 之间的文本被显示为段落
 
 
 #### html 标题
@@ -58,7 +63,7 @@ HTML 标题（Heading）是通过 <h1> - <h6> 等标签进行定义的。
 ````
 
 #### HTML 段落
-HTML 段落是通过 <p> 标签进行定义的。
+HTML 段落是通过 \<p\> 标签进行定义的。
 ````buildoutcfg
 <p>This is a paragraph.</p>
 <p>This is another paragraph.</p>
