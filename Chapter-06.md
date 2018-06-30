@@ -438,11 +438,12 @@ select 元素（下拉列表）
 <option value="audi">Audi</option>
 </select>
 ````
+
 \<option\> 元素定义待选择的选项。
 列表通常会把首个选项显示为被选选项。
 能够通过添加 selected 属性来定义预定义选项
 
-<textarea> 元素定义多行输入字段（文本域）
+\<textarea\> 元素定义多行输入字段（文本域）
 ````
 <textarea name="message" rows="10" cols="30">
 The cat was playing in the garden.
