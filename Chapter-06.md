@@ -17,7 +17,8 @@ HTML 标记标签通常被称为 HTML 标签 (HTML tag)
 #### 网页
 网页就是html 文档，Web 浏览器的作用是读取 HTML 文档，并以网页的形式显示出它们。
 浏览器不会显示 HTML 标签，而是使用标签来解释页面的内容：
-````buildoutcfg
+
+````
 <html>
 <head>
 <title>
@@ -35,28 +36,28 @@ HTML 标记标签通常被称为 HTML 标签 (HTML tag)
 ````
 
 如果浏览器线上乱码，设置下字符集
-````buildoutcfg
+````
 <meta charset=utf-8" />
 ````
 
-\<html\> 与 \</html\> 之间的文本描述网页
+`<html>` 与 `</html>` 之间的文本描述网页
 
-\<head\> 与 \</head\>之间用来定义文档的头部，它是头部所有标签的容器
+`<head>` 与 `</head>`之间用来定义文档的头部，它是头部所有标签的容器
 
-\<title\> 与 \</title\>之间用来定义文档在浏览器标签上显示的标题
+`<title>` 与 `</title>`之间用来定义文档在浏览器标签上显示的标题
 
-\<body\> 与 \</body\> 之间的文本是可见的页面内容
+`<body>` 与 `</body>` 之间的文本是可见的页面内容
 
-\<h1\> 与\</h1\> 之间的文本定义文档内的标题
+`<h1>` 与`</h1>` 之间的文本定义文档内的标题
 
-\<p\> 与\</p\> 之间的文本被显示为段落
+`<p>` 与`</p>` 之间的文本被显示为段落
 
 
 #### html 标题
 
-HTML 标题（Heading）是通过\<h1\> - \<h6\> 等标签进行定义的。
+HTML 标题（Heading）是通过`<h1>` - `<h6>` 等标签进行定义的。
 
-````buildoutcfg
+````
 <h1>This is a heading</h1>
 <h2>This is a heading</h2>
 <h3>This is a heading</h3>
@@ -64,27 +65,27 @@ HTML 标题（Heading）是通过\<h1\> - \<h6\> 等标签进行定义的。
 
 #### HTML 段落
 HTML 段落是通过 \<p\> 标签进行定义的。
-````buildoutcfg
+````
 <p>This is a paragraph.</p>
 <p>This is another paragraph.</p>
 ````
 注意在html里面换行是没有意义的
 
 #### HTML 链接
-````buildoutcfg
+````
 <a href="http://www.longtengtest.com/">龙腾测试</a>
 ````
 
 #### HTML 图像
 
-````buildoutcfg
+````
 <img src="ltcs.jpg" width="104" height="142" />
 ````
 
 #### html 元素
 
 HTML 文档是由 HTML 元素定义的，HTML 元素指的是从开始标签（start tag）到结束标签（end tag）的所有代码
-````buildoutcfg
+````
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
@@ -96,7 +97,7 @@ HTML 文档是由 HTML 元素定义的，HTML 元素指的是从开始标签（s
 </body>
 </html>
 ````
-\<html\>和\</html\>之间是html元素，\<head\>和\</head\> 之间是head元素，可以看到元素是可以嵌套的
+`<html>`和`</html>`之间是html元素，`<head>`和`</head>` 之间是head元素，可以看到元素是可以嵌套的
 
 #### HTML 属性
 HTML 标签可以拥有属性。属性提供了有关 HTML 元素的更多的信息。
@@ -104,13 +105,13 @@ HTML 标签可以拥有属性。属性提供了有关 HTML 元素的更多的信
 属性总是在 HTML 元素的开始标签中规定。
 
 这里href就是标签<a>的属性
-````buildoutcfg
+````
 <a href="http://www.longtengtest.com/">龙腾测试</a>
 ````
 
 属性例子1,对齐方式
 
-````buildoutcfg
+````
 <h1 align="center">对齐范式</h1>
 ````
 
@@ -118,7 +119,7 @@ HTML 标签可以拥有属性。属性提供了有关 HTML 元素的更多的信
 
 属性例子2，背景颜色
 
-````buildoutcfg
+````
 <body bgcolor="yellow">
 </body>
 ````
@@ -127,7 +128,7 @@ HTML 标签可以拥有属性。属性提供了有关 HTML 元素的更多的信
 
 #### HTML 折行
 在不产生新段落的情况下换行\<br/\>
-````buildoutcfg
+````
 <p>This is<br />a para<br />graph with line breaks</p>
 ````
 注意: 当显示页面时，浏览器会移除源代码中多余的空格和空行。所有连续的空格或空行都会被算作一个空格。
@@ -135,7 +136,7 @@ HTML 标签可以拥有属性。属性提供了有关 HTML 元素的更多的信
 
 
 #### HTML 样式
-````buildoutcfg
+````
 <h1>Look! Styles and colors</h1>
 <p style="font-family:verdana;color:red">
     This text is in Verdana and red
@@ -157,7 +158,7 @@ font-family 规定元素的字体，
 font-size 字体大小font-size 字体大小
 
 例子文本对齐
-````buildoutcfg
+````
 <h1 style="text-align:center">This is a heading</h1>
 <p>The heading above is aligned to the center of this page.</p>
 ````
@@ -165,13 +166,13 @@ font-size 字体大小font-size 字体大小
 
 
 #### HTML 注释标签
-````buildoutcfg
+````
 <!-- 在此处写注释 -->
 ````
 在开始标签中有一个惊叹号，但是结束标签中没有。
 浏览器不会显示注释，但是能够帮助记录您的 HTML 文档
 
-````buildoutcfg
+````
 <!-- 这是一段注释 -->
 
 <p>这是一个段落。</p>
@@ -182,7 +183,7 @@ font-size 字体大小font-size 字体大小
 有序列表是一列项目，列表项目使用数字进行标记。
 有序列表始于 \<ol\> 标签。每个列表项始于 \<li\> 标签。
 
-````buildoutcfg
+````
 <ol>
 <li>咖啡</li>
 <li>牛奶</li>
@@ -192,7 +193,7 @@ font-size 字体大小font-size 字体大小
 自定义列表不仅仅是一列项目，而是项目及其注释的组合。
 自定义列表以 <dl> 标签开始。每个自定义列表项以 <dt> 开始。每个自定义列表项的定义以 <dd> 开始。
 
-````buildoutcfg
+````
 <dl>
 <dt>咖啡</dt>
 <dd>黑色热饮</dd>
@@ -202,7 +203,7 @@ font-size 字体大小font-size 字体大小
 ````
 
 例子1
-````buildoutcfg
+````
 <h4>Disc 项目符号列表：</h4>
 <ul type="disc">
  <li>苹果</li>
@@ -230,7 +231,7 @@ font-size 字体大小font-size 字体大小
 
 例子2
 
-````buildoutcfg
+````
 <h4>数字列表：</h4>
 <ol>
  <li>苹果</li>
@@ -274,7 +275,7 @@ font-size 字体大小font-size 字体大小
 
 例子3
 
-````buildoutcfg
+````
 <dl>
    <dt>计算机</dt>
    <dd>用来计算的仪器 ... ...</dd>
@@ -286,7 +287,7 @@ font-size 字体大小font-size 字体大小
 
 嵌套列表
 例子1
-````buildoutcfg
+````
 <h4>一个嵌套列表：</h4>
 <ul>
   <li>咖啡</li>
@@ -302,7 +303,7 @@ font-size 字体大小font-size 字体大小
 
 例子2
 
-````buildoutcfg
+````
 <h4>一个嵌套列表：</h4>
 <ul>
   <li>咖啡</li>
@@ -327,7 +328,7 @@ font-size 字体大小font-size 字体大小
 字母 td 指表格数据（table data），即数据单元格的内容。
 数据单元格可以包含文本、图片、列表、段落、表单、水平线、表格等等。
 
-````buildoutcfg
+````
 <table border="1">
 <tr>
 <td>row 1, cell 1</td>
@@ -347,7 +348,7 @@ border 边框属性
 表格的表头
 表格的表头使用 \<th\> 标签进行定义。
 
-````buildoutcfg
+````
 <table border="1">
 <tr>
 <th>Heading</th>
@@ -379,7 +380,7 @@ radio	 定义单选按钮输入（选择多个选择之一）
 submit	 定义提交按钮（提交表单）
 
 例子1
-```buildoutcfg
+```
 <form>
  First name:<br>
 <input type="text" name="firstname">
@@ -394,7 +395,7 @@ submit	 定义提交按钮（提交表单）
 \<input type="radio"\> 定义单选按钮。
 单选按钮允许用户在有限数量的选项中选择其中之一：
 
-```buildoutcfg
+```
 <form>
 <input type="radio" name="sex" value="male" checked>Male
 <br>
@@ -406,7 +407,7 @@ submit	 定义提交按钮（提交表单）
 表单处理程序通常是包含用来处理输入数据的脚本的服务器页面。
 表单处理程序在表单的 action 属性中指定：
 
-````buildoutcfg
+````
 <form action="action_page.php">
 First name:<br>
 <input type="text" name="firstname" value="Mickey">
@@ -430,7 +431,7 @@ Name 属性
 
 select 元素（下拉列表）
 
-````buildoutcfg
+````
 <select name="cars">
 <option value="volvo">Volvo</option>
 <option value="saab">Saab</option>
@@ -469,7 +470,7 @@ value 属性规定输入字段的初始值
 ````
 
 readonly 属性规定输入字段为只读（不能修改）
-```buildoutcfg
+```
 <form action="">
  First name:<br>
 <input type="text" name="firstname" value="John" readonly>
@@ -781,9 +782,11 @@ CSS中的所有颜色值都是在sRGB（标准的红色，绿色和蓝色）颜�
 
 这些名称及其相应的颜色由CSS规范确定。最常见的颜色，都有关键字名称。
 这些名称的完整列表可以在CSS规范中找到[名称](https://www.w3.org/TR/css-color-3/)。
+
 ![img](./Chapter-06-code/css-colors.png)
 
 在这里，我们将褐色背景应用于具有task class属性值和将yellow背景应用于具有count class属性值
+
 [示例](./Chapter-06-code/css-example6.html)
 ```
 .task {
