@@ -593,3 +593,125 @@ Book模型添加
 language = models.ForeignKey('Language', on_delete=models.SET_NULL, null=True)
 ```
  
+## django admin
+现在我们已经为LocalLibrary网站创建了模型，我们将使用Django Admin网站添加一些“真实”的图书数据，首先，我们来看如何使用管理站点注册模型，然后来看如何登录和创建一些数据。在最后，我们将展示一些可以进一步改进Admin站点演示的方法
+
+Django管理应用程序可以使用你的模型自动构建可用于创建，查看，更新和删除记录的站点区域，这可以在开发过程中节省大量时间，使您可以非常轻松地测试模型并了解您是否拥有正确的数据。管理应用程序还可用于管理生产中的数据，具体取决于网站的类型。Django项目建议仅用于内部数据管理（即仅供管理员或组织内部人员使用），因为以模型为中心的方法不一定是所有用户最好的界面，并且暴露了大量不必要的细节关于模型。
+
+### Registering models
+
+首先，在应用程序(/locallibrary/catalog/admin.py)的目录中打开 admin.py 。如果它目前看起来像这样,注意它已经导入：django.contrib.admin
+```
+from django.contrib import admin
+
+# Register your models here.
+
+```
+
+导入models
+```
+from .models import Author, Genre, Book, BookInstance,Language
+
+admin.site.register(Book)
+admin.site.register(Author)
+admin.site.register(Genre)
+admin.site.register(BookInstance)
+admin.site.register(Language)
+```
+###  创建一个superuser
+要登录管理站点，我们需要一个启用了员工状态的用户帐户。为了查看和创建记录，我们还需要此用户具有管理所有对象的权限。可以使用manage.py创建具有对站点的完全访问权限和所有所需权限的“超级用户”帐户
+
+```
+python manage.py createsuperuser
+```
+
+### 高级配置
+Django使用注册模型中的信息创建基本管理站点做得非常好
++ 每个模型都有一个单独的记录列表，由使用模型的__str __（）方法创建的字符串标识，并链接到详细视图/表单以进行编辑,默认情况下，此视图在顶部有一个操作菜单，可用于对记录执行批量删除操作.
++ 用于编辑和添加记录的模型详细记录表单包含模型中的所有字段，这些字段按其声明顺序垂直排列
+
+你可以进一步自定义界面，使其更易于使用。你可以做的一些事情是
++ List views
+  + 添加为每条记录显示的其他字段/信息
+  + 添加过滤器以根据日期或某些其他选择值（例如，借阅状态）选择列出的记录
+  + 将其他选项添加到列表视图中的操作菜单，并选择此菜单在表单上的显示位置
++ Detail views
+  + 选择要显示（或排除）的字段及其顺序，分组，是否可编辑，使用的小部件，方向等。
+  + 将相关字段添加到记录以允许内联编辑（例如，在创建作者记录时添加添加和编辑书籍记录的功能）
+
+**Register a ModelAdmin class**
+
+要更改模型在管理界面中的显示方式，请定义ModelAdmin类（描述布局）并将其注册到模型中
+让我们从Authour模型开始。在应用程序目录中打开admin.py（/locallibrary/catalog/admin.py）。注释Authour模型的注册：
+
+```
+# admin.site.register(Author)
+```
+
+现在添加一个新的AuthorAdmin和注册，如下所示
+```
+# Define the admin class
+class AuthorAdmin(admin.ModelAdmin):
+    pass
+
+# Register the admin class with the associated model
+admin.site.register(Author, AuthorAdmin)
+```
+现在我们将为Book和BookInstance添加ModelAdmin类。我们再次需要注释掉注册
+```
+#admin.site.register(Book)
+#admin.site.register(BookInstance)
+```
+现在创建并注册新模型;为了演示的目的，我们将使用@register装饰器来注册模型（这与admin.site.register（）语法完全相同）：
+
+```
+# Register the Admin classes for Book using the decorator
+
+@admin.register(Book)
+class BookAdmin(admin.ModelAdmin):
+    pass
+
+# Register the Admin classes for BookInstance using the decorator
+
+@admin.register(BookInstance) 
+class BookInstanceAdmin(admin.ModelAdmin):
+    pass
+```
+
+目前我们所有的管理类都是空的，因此django-admin行为将保持不变！我们现在可以扩展它们来定义我们特定于模型的管理行为
+
+**Configure list views**
+
+对于Authour模型localLibrary当前列出了使用从模型__str __()方法生成的对象名称的所有authour,当你只有一些作者时这很好，但是一旦你有很多作者，你可能会有重复。要区分它们，或者仅仅因为想要显示有关每个作者的更多有趣信息，你可以使用list_display向视图添加其他字段
+
+```
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ('last_name', 'first_name', 'date_of_birth', 'date_of_death')
+```
+
+对于我们的Book模型，我们还将显示author和类别
+```
+class BookAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'display_genre')
+```
+遗憾的是，我们无法直接在list_display中指定类型字段，因为它是ManyToManyField。我们将定义一个display_genre函数来将信息作为字符串获取
+
+将以下代码添加到Book模型（models.py）中。这将从类型字段的前三个值（如果存在）创建一个字符串，并创建一个short_description，管理站点列中显示列名。
+
+```
+def display_genre(self):
+        """
+        Creates a string for the Genre. This is required to display genre in Admin.
+        """
+        return ', '.join([ genre.name for genre in self.genre.all()[:3] ])
+    display_genre.short_description = 'Genre'
+```
+**Add list filters**
+
+一旦列表中有很多记录，就可以过滤显示哪些记录。这是通过列出list_filter属性中的字段来完成的。用下面的代码片段替换当前的BookInstanceAdmin类
+
+```
+list_filter = ('status', 'due_back')
+```
+
+
