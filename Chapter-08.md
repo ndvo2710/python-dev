@@ -424,5 +424,172 @@ books_containing_genre = Book.objects.filter(genre__name__icontains='fiction')
 Book 所管关联的Genre模型中，字段名为name的字段值中包含fiction字符串的
 注意：icontains忽略大小写，contains 区分大小写
 
+### 定义LocalLibrary模型
 
+我们将开始为库定义模型。打开models.py（在locallibrary/catalog/中）
+```
+from django.db import models
+
+# Create your models here.
+
+```
+from import语句导入models模块，模块模块包含我们的模型将继承的模型基类models.Model
+
+**Genre model**
+
+复制下面显示的类型模型代码并将其粘贴到models.py。此模型用于存储有关图书类别的信息（例如：文学，历史，经济。。）
+我们将类型创建为模型而不是自由文本或选择列表，以便可以通过数据库管理。
+
+```
+class Genre(models.Model):
+    """
+    Model representing a book genre (e.g. Science Fiction, Non Fiction).
+    """
+    name = models.CharField(max_length=200, help_text="Enter a book genre (e.g. Science Fiction, French Poetry etc.)")
+    
+    def __str__(self):
+        """
+        String for representing the Model object (in Admin site etc.)
+        """
+        return self.name
+```
+
+该模型有一个CharField字段（name），用于描述类型（这限制为200个字符，并有help_text参数），在模型的最后，我们声明了一个__str __（）方法，它只返回由特定记录定义的类型的名称
+
+**Book model**
+
+```
+from django.urls import reverse #Used to generate URLs by reversing the URL patterns
+
+class Book(models.Model):
+    """
+    Model representing a book (but not a specific copy of a book).
+    """
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True)
+    summary = models.TextField(max_length=1000, help_text='Enter a brief description of the book')
+    isbn = models.CharField('ISBN',max_length=13, help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
+    genre = models.ManyToManyField(Genre, help_text='Select a genre for this book')
+    
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        return self.title
+    
+    
+    def get_absolute_url(self):
+        """
+        Returns the url to access a detail record for this book.
+        """
+        return reverse('book-detail', args=[str(self.id)])
+```
+
+书籍模型代表一般意义上的可用书籍的所有信息，但不是可用于特定物理“实例”或“副本”.该模型使用CharField来表示书的title和isbn,注意isbn如何使用第一个未命名参数将其标签指定为“ISBN”，因为默认标签将为“Isbn”.genre 是ManyToManyField，因此一本书可以有多种类型，一种类型可以有很多书。author为ForeignKey，因此每本书只有一个作者，但作者可能有很多书。在两种字段类型中，使用模型类或包含相关模型名称的字符串将相关模型类声明为第一个未命名参数。如果在引用之前尚未在此文件中定义关联的类，则必须将模型的名称用作字符串！
+author字段中null = True，意思如果没有选择作者，则允许数据库存储Null值。on_delete = models.SET_NULL，如果关联的作者记录被删除，它将把author的值设置为Null。
+
+该模型还定义__str __（），使用书籍的title字段来表示书的记录，get_absolute_url（）返回一个可用于访问此模型的详细记录的URL（为此，我们必须定义具有名称book-detail的URL映射，并定义关联的视图和模板）。
+
+
+**BookInstance model**
+
+BookInstance表示某人可能借阅的特定的一本书，并包含改书是否可借阅、预期返回的日期、版本信息、唯一id等
+
+```
+import uuid # Required for unique book instances
+
+class BookInstance(models.Model):
+    """
+    Model representing a specific copy of a book (i.e. that can be borrowed from the library).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text="Unique ID for this particular book across whole library")
+    book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True) 
+    imprint = models.CharField(max_length=200)
+    due_back = models.DateField(null=True, blank=True)
+
+    LOAN_STATUS = (
+        ('m', 'Maintenance'),
+        ('o', 'On loan'),
+        ('a', 'Available'),
+        ('r', 'Reserved'),
+    )
+
+    status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default='m', help_text='Book availability')
+
+    class Meta:
+        ordering = ["due_back"]
+        
+
+    def __str__(self):
+        """
+        String for representing the Model object
+        """
+        return '{0} ({1})'.format(self.id,self.book.title)
+```
++ id UUIDField用于id字段，将其设置为此模型的primary_key。这种类型的字段为每个实例分配一个全局唯一值
++ book ForeignKey用于识别关联的书籍（每本书可以有多个副本，但副本只能有一本书）
++ imprint CharField代表书的特定版本
++ due_back DateField 可借阅日期（在借阅或维护之后，预计该书将可借阅的日期）此值可以为null。Class Meta 使用此字段在查询中返回记录时对记录进行排序。
++ status CharField定义一个下拉列表，我们定义一个包含键值对元组的元组，并将其传递给choices参数.键/值对中的值是用户可以选择的显示值，而键是在选择选项时实际保存的值.我们还设置了default 为'm'（维护），因为在书架上放置书籍之前，它们最初将被创建为不可用。
++ __str __（）使用其唯一ID和关联的Book的标题的组合来表示BookInstance对象。
+
+**Author model**
+
+```
+class Author(models.Model):
+    """
+    Model representing an author.
+    """
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    date_of_birth = models.DateField(null=True, blank=True)
+    date_of_death = models.DateField('Died', null=True, blank=True)
+
+    class Meta:
+        ordering = ["last_name","first_name"]
+    
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular author instance.
+        """
+        return reverse('author-detail', args=[str(self.id)])
+    
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        return '{0}, {1}'.format(self.last_name,self.first_name)
+```
+
+该模型将作者定义为具有名字，姓氏，出生日期和死亡日期(可选)， __str__() 返回单条记录的名称，get_absolute_url() 方法，返回作者详细信息URL映射以获取用于显示单个作者的URL。class Meta ordering定义返回一个查询集时的排序
+
+### 重新运行数据库迁移
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### 练习
+想一下，书有很多种语言中文，英语，法语。。。如何体现出书的语言？
++ 我们需要添加一个新的模型language
++ 关联到Book模型
+
+
+```
+class Language(models.Model):
+    """
+    Model representing a Language (e.g. English, French, Japanese, etc.)
+    """
+    name = models.CharField(max_length=200, help_text="Enter a the book's natural language (e.g. English, French, Japanese etc.)")
+    
+    def __str__(self):
+        """
+        String for representing the Model object (in Admin site etc.)
+        """
+        return self.name
+
+Book模型添加
+language = models.ForeignKey('Language', on_delete=models.SET_NULL, null=True)
+```
  
