@@ -13,16 +13,20 @@ admin.site.register(Language)
 class AuthorAdmin(admin.ModelAdmin):
     #pass
     list_display = ('last_name', 'first_name', 'date_of_birth', 'date_of_death')
-
+    fields = ['last_name', 'first_name', ('date_of_birth', 'date_of_death')]
 # Register the admin class with the associated model
 admin.site.register(Author, AuthorAdmin)
 
+
+class BooksInstanceInline(admin.TabularInline):
+    model = BookInstance
 # Register the Admin classes for Book using the decorator
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     #pass
     list_display = ('title', 'author', 'display_genre')
+    inlines = [BooksInstanceInline]
 
 # Register the Admin classes for BookInstance using the decorator
 
@@ -30,3 +34,11 @@ class BookAdmin(admin.ModelAdmin):
 class BookInstanceAdmin(admin.ModelAdmin):
     #pass
     list_filter = ('status', 'due_back')
+    fieldsets = (
+        (None, {
+            'fields': ('book','imprint', 'id')
+        }),
+        ('Availability', {
+            'fields': ('status', 'due_back')
+        }),
+    )
