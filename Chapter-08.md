@@ -714,4 +714,48 @@ def display_genre(self):
 list_filter = ('status', 'due_back')
 ```
 
+**Detail view**
+
+默认情况下，详细视图按照其在模型中声明的顺序垂直排列所有字段。你可以更改声明的顺序，哪些字段显示（或排除），区段是否用于组织信息，字段是水平还是垂直显示，甚至是管理窗体中使用的编辑窗口小部件
+
+**控制哪些字段被显示和布局**
+更新您的  AuthorAdmin 类，如下所示：
+```
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ('last_name', 'first_name', 'date_of_birth', 'date_of_death')
+    fields = ['first_name', 'last_name', ('date_of_birth', 'date_of_death')]
+```
+
+fields控制表单上显示字段的顺序，表单中的字段默认按model中的顺序列出，定义fields后按fields里面的顺序列出。
+字段默认垂直显示，但是多个字段放在元组中后，多个字段展示在一行
+
+** 将详细视图分为多个部分**
+
+在  BookInstance详细视图中，我们将name，imprint，id和status，due_back分成两部分.每个部分都有自己的标题,None为空标题
+
+```
+@admin.register(BookInstance)
+class BookInstanceAdmin(admin.ModelAdmin):
+    list_filter = ('status', 'due_back')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('book','imprint', 'id')
+        }),
+        ('Availability', {
+            'fields': ('status', 'due_back')
+        }),
+    )
+```
+
+**内联编辑**
+```
+class BooksInstanceInline(admin.TabularInline):
+    model = BookInstance
+
+@admin.register(Book)
+class BookAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'display_genre')
+    inlines = [BooksInstanceInline]
+```
 
