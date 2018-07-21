@@ -227,3 +227,236 @@ return render(
 STATIC_ROOT = BASE_DIR + '/catalog/static/'
 ```
 STATIC_ROOT 全局指定静态文件位置
+
+## 通用列表和详细视图
+
+### 书本清单页面
+书本清单页面，将显示页面中所有可用图书记录的列表，使用url: catalog/books/进行访问。该页面将显示每条记录的标题和作者，标题是指向相关图书详细信息页面的超链接。该页面将具有与站点中，所有其他页面相同的结构和导航，因此，我们可以扩展在上一个教程中创建的基本模板（base_generic.html）。
+
+**URL映射**
+
+打开/catalog/urls.py ，添加下面内容，这个path()函数，定义了一个与 URL 匹配的模式（'books/'），如果URL匹配，将调用视图函数（views.BookListView.as_view()）和一个对应这个特定映射的名称。
+
+```
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('books/', views.BookListView.as_view(), name='books'),
+]
+```
+
+**View（基于类）**
+
+我们可以很容易地，将书本列表视图编写为常规函数（就像我们之前的索引视图一样），它将查询数据库中的所有书本，然后调用render()，将列表传递给指定的模板。然而，我们用另一种方法取代，我们将使用基于类的通用列表视图（ListView） - 一个继承自现有视图的类。因为通用视图，已经实现了我们需要的大部分功能，并且遵循 Django 最佳实践，我们将能够创建更强大的列表视图，代码更少，重复次数更少
+
+打开 catalog/views.py，并将以下代码复制到文件的底部：
+
+```
+from django.views import generic
+
+class BookListView(generic.ListView):
+    model = Book
+```
+
+通用视图将查询数据库，以获取指定模型（Book）的所有记录，然后呈现位于locallibrary/catalog/templates/catalog/book_list.html 的模板（我们将在下面创建）。在模板中，您可以使用名为object_list 或 book_list的模板变量（即通常为“the_model_name_list”），以访问书本列表
+
+可以添加属性，以更改上面的默认行为。例如，如果需要使用同一模型的多个视图，则可以指定另一个模板文件，或者如果book_list对于特定模板用例不直观，则可能需要使用不同的模板变量名称。可能最有用的变更，是更改/过滤返回的结果子集 - 因此，您可能会列出其他用户阅读的前5本书，而不是列出所有书本。
+
+```
+class BookListView(generic.ListView):
+    model = Book
+    context_object_name = 'my_book_list'   # your own name for the list as a template variable
+    queryset = Book.objects.filter(title__icontains='war')[:5] # Get 5 books containing the title war
+    template_name = 'books/my_arbitrary_template_name_list.html'  # Specify your own template name/location
+```
+context_object_name 更改模板中引用对象的名称
+queryset 更改默认的查询结果默认返回改modle的所有记录
+template_name 更改默认的模板名称
+
+**创建列表视图模板**
+
+创建 HTML 文件 /locallibrary/catalog/templates/catalog/book_list.html，并复制到下面的文本中。如上所述，这是基于类的通用列表视图，所期望的默认模板文件（对于名为catalog的应用程序中，名为Book的模型）。
+
+通用视图的模板就像任何其他模板一样（当然，传递给模板的上下文/信息可能不同）。与我们的index模板一样，我们在第一行扩展基本模板，然后替换名为content的区块。
+
+ ```
+ {% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Book List</h1>
+
+    {% if book_list %}
+    <ul>
+
+      {% for book in book_list %}
+      <li>
+        <a href="{{ book.get_absolute_url }}">{{ book.title }}</a> ({{book.author}})
+      </li>
+      {% endfor %}
+
+    </ul>
+    {% else %}
+      <p>There are no books in the library.</p>
+    {% endif %}       
+{% endblock %}
+ ```
+
+ 条件执行
+ 我们使用 if, else 和 endif模板标签，来检查 book_list是否已定义且不为空。如果 book_list为空，则 else子句显示文本，说明没有要列出的书本。如果 book_list不为空，那么我们遍历书本列表
+
+ ```
+ {% if book_list %}
+  <!-- code here to list the books -->
+{% else %}
+  <p>There are no books in the library.</p>
+{% endif %}
+ ```
+
+ For 循环
+
+ 模板使用for 和 endfor模板标签，以循环遍历书本列表，如下所示。每次迭代都会使用当前列表项的信息，填充书本模板变量book
+
+```
+{% for book in book_list %}
+  <li> <!-- code here get information from each book item --> </li>
+{% endfor %}
+```
+
+访问变量
+
+循环内的代码，为每本书创建一个列表项，显示作者和标题（作为尚未创建的详细视图的链接）。
+
+```
+<a href="{{ book.get_absolute_url }}">{{ book.title }}</a> ({{book.author}})
+```
+
+我们使用“点符号”（例如 book.title 和 book.author）访问相关书本记录的字段，其中书本项目book后面的文本是字段名称（如同在模型中定义的）。
+
+我们还可以在模板中，调用模型中的函数 - 在这里，我们调用Book.get_absolute_url()，来获取可用于显示关联详细记录的URL。这项工作提供的函数没有任何参数（没有办法传递参数！）
+
+更新基本模板
+打开基本模板（/locallibrary/catalog/templates/base_generic.html）并将 {% url 'books' %} 插入所有书本 All books 的 URL 链接，如下所示。这将启用所有页面中的链接（由于我们已经创建了 “books” 的 url 映射器，我们可以成功地将其设置到位）
+
+
+```
+<li><a href="{% url 'books' %}">All books</a></li>
+```
+
+### 书本详细信息页面
+
+书本详细信息页面，将显示有关特定书本的信息，使用 URL catalog/book/<id>（其中 <id> 是Book的主键）进行访问。除了Book模型中的字段（作者，摘要，ISBN，语言和种类）之外，我们还将列出可用副本（BookInstances）的详细信息，包括状态，预期返回日期，印记和 id。这将使我们的读者，不仅可以了解该书，还可以确认是否/何时可用
+
+**URL 映射**
+
+打开 /catalog/urls.py ，并添加下面粗体显示的 “book-detail” URL 映射器。这个 path() 函数定义了一个模式，关联到基于通用类的详细信息视图和名称。
+
+```
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('books/', views.BookListView.as_view(), name='books'),
+    path('book/<int:pk>', views.BookDetailView.as_view(), name='book-detail'),
+]
+```
+对于书本详细信息路径，URL 模式使用特殊语法，来捕获我们想要查看的书本的特定 id。语法非常简单：尖括号定义要捕获的URL部分，包含视图可用于访问捕获数据的变量的名称。例如，<something> 将捕获标记的模式，并将值作为变量 “something” ，传递给视图。你可以选择在变量名称前，加上一个定义数据类型的转换器规范（int，str，slug，uuid，path）。
+
+在这里，我们使用 '<int:pk>' 来捕获 book id，它必须是一个整数，并将其作为名为 pk 的参数（主键的缩写）传递给视图。
+
+基于类的通用详细信息视图，需要传递一个名为 pk 的参数。如果您正在编写自己的函数视图，则可以使用您喜欢的任何参数名称，或者，确实也可以，在未命名的参数中传递信息
+
+**View (基于类)**
+打开 catalog / views.py，并将以下代码复制到文件的底部
+ 
+```
+class BookDetailView(generic.DetailView):
+    model = Book
+```
+
+**创建详细信息视图模板**
+
+创建 HTML 文件 /locallibrary/catalog/templates/catalog/book_detail.html
+
+```
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Title: {{ book.title }}</h1>
+
+  <p><strong>Author:</strong> <a href="">{{ book.author }}</a></p> <!-- author detail link not yet defined -->
+  <p><strong>Summary:</strong> {{ book.summary }}</p>
+  <p><strong>ISBN:</strong> {{ book.isbn }}</p> 
+  <p><strong>Language:</strong> {{ book.language }}</p>  
+  <p><strong>Genre:</strong> {% for genre in book.genre.all %} {{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
+
+  <div style="margin-left:20px;margin-top:20px">
+    <h4>Copies</h4>
+
+    {% for copy in book.bookinstance_set.all %}
+    <hr>
+    <p class="{% if copy.status == 'a' %}text-success{% elif copy.status == 'm' %}text-danger{% else %}text-warning{% endif %}">{{ copy.get_status_display }}</p>
+    {% if copy.status != 'a' %}<p><strong>Due to be returned:</strong> {{copy.due_back}}</p>{% endif %}
+    <p><strong>Imprint:</strong> {{copy.imprint}}</p>
+    <p class="text-muted"><strong>Id:</strong> {{copy.id}}</p>
+    {% endfor %}
+  </div>
+{% endblock %}
+```
+此模板中的几乎所有内容，都已在前面描述过
++ 我们扩展基本模板，并覆盖 “内容”区块 content。
++ 我们使用条件处理(if else endif)，来确定是否显示特定内容。
++ 我们使用 for 循环遍历对象列表
++ 我们使用 "点表示法" 访问context字段（因为我们使用了详细的通用视图，context被命名为book） 
+
+函数book.bookinstance_set.all()返回与特定 Book 相关联的 BookInstance记录集合。
+
+```
+{% for copy in book.bookinstance_set.all %}
+<!-- code to iterate across each copy/instance of a book -->
+{% endfor %}
+```
+
+需要此方法，是因为仅在关系的 “一” 侧声明 ForeignKey（一对多）字段。由于没有做任何事情，来声明其他（“多”）模型中的关系，因此它没有任何字段，来获取相关记录集。为了解决这个问题，Django构造了一个适当命名的 “反向查找” 函数，您可以使用它。函数的名称，是通过对声明 ForeignKey 的模型名称，转化为小写来构造的，然后是_set（即，在 Book 中创建的函数是 bookinstance_set())
+
+### 分页
+
+记录少的时候，我们的图书清单页面看起来会很好。但是，当进入数十或数百条记录的页面时，页面将逐渐花费更长时间加载（并且有太多内容无法合理浏览）。此问题的解决方案，是为列表视图添加分页，减少每页上显示的项目数。
+
+Django 在分页方面，拥有出色的内置支持。更好的是，它内置于基于类的通用列表视图中，因此您无需执行太多操作即可启用它！
+
+打开 catalog/views.py，修改为以下内容
+
+```
+class BookListView(generic.ListView):
+    model = Book
+    paginate_by = 10
+```
+
+现在数据已经分页，我们需要添加对模板的支持，以滚动结果集合。因为我们可能希望在所有列表视图中，都执行此操作，所以我们将以可添加到基本模板的方式，执行此操作。
+
+打开 /locallibrary/catalog/templates/base_generic.html，修改为以下内容。代码首先检查当前页面上，是否启用了分页。如果是，则它会根据需要，添加下一个和上一个链接（以及当前页码）。
+
+```
+{% block content %}{% endblock %}
+  
+{% block pagination %}
+  {% if is_paginated %}
+      <div class="pagination">
+          <span class="page-links">
+              {% if page_obj.has_previous %}
+                  <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+              {% endif %}
+              <span class="page-current">
+                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+              </span>
+              {% if page_obj.has_next %}
+                  <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+              {% endif %}
+          </span>
+      </div>
+  {% endif %}
+{% endblock %} 
+```
+
+page_obj 是一个 Paginator 对象，如果在当前页面上使用分页，它将存在。 它允许您获取有关当前页面，之前页面，有多少页面等的所有信息。
+
+练习：
+1. 实现Authour列表视图
+2. 实现Authour详细视图
