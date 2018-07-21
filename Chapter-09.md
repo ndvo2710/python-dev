@@ -144,14 +144,33 @@ index模版将需要标准的HTML标记头部和正文，以及用于导航的�
       <div class="col-sm-2">
       {% block sidebar %}
       <ul class="sidebar-nav">
-          <li><a href="{% url 'index' %}">Home</a></li>
-          <li><a href="">All books</a></li>
-          <li><a href="">All authors</a></li>
+          <li><a href="{% url 'index' %}">首页</a></li>
+          <li><a href="{% url 'books' %}">图书</a></li>
+          <li><a href="{% url 'authors' %}">作者</a></li>
       </ul>
      {% endblock %}
       </div>
       <div class="col-sm-10 ">
       {% block content %}{% endblock %}
+
+  
+      {% block pagination %}
+        {% if is_paginated %}
+            <div class="pagination">
+                <span class="page-links">
+                    {% if page_obj.has_previous %}
+                        <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+                    <span class="page-current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% endif %}
+      {% endblock %} 
       </div>
     </div>
 
@@ -177,18 +196,18 @@ index模版将需要标准的HTML标记头部和正文，以及用于导航的�
 {% extends "base_generic.html" %}
 
 {% block content %}
-<h1>Local Library Home</h1>
+<h1>首页</h1>
 
-  <p>Welcome to <em>LocalLibrary</em>, a very basic Django website developed as a tutorial example on the Mozilla Developer Network.</p>
+  <p>欢迎使用 <em>图书管理系统</em>.</p>
 
-<h2>Dynamic content</h2>
+<h2>动态内容</h2>
 
-  <p>The library has the following record counts:</p>
+  <p>概览:</p>
   <ul>
-    <li><strong>Books:</strong> {{ num_books }}</li>
-    <li><strong>Copies:</strong> {{ num_instances }}</li>
-    <li><strong>Copies available:</strong> {{ num_instances_available }}</li>
-    <li><strong>Authors:</strong> {{ num_authors }}</li>
+    <li><strong>图书:</strong> {{ num_books }}</li>
+    <li><strong>副本:</strong> {{ num_instances }}</li>
+    <li><strong>可以图书:</strong> {{ num_instances_available }}</li>
+    <li><strong>作者:</strong> {{ num_authors }}</li>
   </ul>
 
 {% endblock %}
@@ -282,7 +301,7 @@ template_name 更改默认的模板名称
  {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>Book List</h1>
+    <h1>图书 列表视图</h1>
 
     {% if book_list %}
     <ul>
@@ -378,22 +397,22 @@ class BookDetailView(generic.DetailView):
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Title: {{ book.title }}</h1>
+  <h1>书名: {{ book.title }}</h1>
 
-  <p><strong>Author:</strong> <a href="">{{ book.author }}</a></p> <!-- author detail link not yet defined -->
-  <p><strong>Summary:</strong> {{ book.summary }}</p>
+  <p><strong>作者:</strong> <a href="">{{ book.author }}</a></p> <!-- author detail link not yet defined -->
+  <p><strong>摘要:</strong> {{ book.summary }}</p>
   <p><strong>ISBN:</strong> {{ book.isbn }}</p> 
-  <p><strong>Language:</strong> {{ book.language }}</p>  
-  <p><strong>Genre:</strong> {% for genre in book.genre.all %} {{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
+  <p><strong>语言:</strong> {{ book.language }}</p>  
+  <p><strong>类别:</strong> {% for genre in book.genre.all %} {{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
 
   <div style="margin-left:20px;margin-top:20px">
-    <h4>Copies</h4>
+    <h4>副本</h4>
 
     {% for copy in book.bookinstance_set.all %}
     <hr>
     <p class="{% if copy.status == 'a' %}text-success{% elif copy.status == 'm' %}text-danger{% else %}text-warning{% endif %}">{{ copy.get_status_display }}</p>
-    {% if copy.status != 'a' %}<p><strong>Due to be returned:</strong> {{copy.due_back}}</p>{% endif %}
-    <p><strong>Imprint:</strong> {{copy.imprint}}</p>
+    {% if copy.status != 'a' %}<p><strong>预计可借日期:</strong> {{copy.due_back}}</p>{% endif %}
+    <p><strong>版次:</strong> {{copy.imprint}}</p>
     <p class="text-muted"><strong>Id:</strong> {{copy.id}}</p>
     {% endfor %}
   </div>
@@ -414,6 +433,8 @@ class BookDetailView(generic.DetailView):
 ```
 
 需要此方法，是因为仅在关系的 “一” 侧声明 ForeignKey（一对多）字段。由于没有做任何事情，来声明其他（“多”）模型中的关系，因此它没有任何字段，来获取相关记录集。为了解决这个问题，Django构造了一个适当命名的 “反向查找” 函数，您可以使用它。函数的名称，是通过对声明 ForeignKey 的模型名称，转化为小写来构造的，然后是_set（即，在 Book 中创建的函数是 bookinstance_set())
+
+get_status_display函数 获取choices属性的值
 
 ### 分页
 

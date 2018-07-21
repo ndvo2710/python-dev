@@ -1,18 +1,18 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<h1>Local Library Home</h1>
+<h1>首页</h1>
 
-  <p>Welcome to <em>LocalLibrary</em>, a very basic Django website developed as a tutorial example on the Mozilla Developer Network.</p>
+  <p>欢迎使用 <em>图书管理系统</em>.</p>
 
-<h2>Dynamic content</h2>
+<h2>动态内容</h2>
 
-  <p>The library has the following record counts:</p>
+  <p>概览:</p>
   <ul>
-    <li><strong>Books:</strong> {{ num_books }}</li>
-    <li><strong>Copies:</strong> {{ num_instances }}</li>
-    <li><strong>Copies available:</strong> {{ num_instances_available }}</li>
-    <li><strong>Authors:</strong> {{ num_authors }}</li>
+    <li><strong>图书:</strong> {{ num_books }}</li>
+    <li><strong>副本:</strong> {{ num_instances }}</li>
+    <li><strong>可以图书:</strong> {{ num_instances_available }}</li>
+    <li><strong>作者:</strong> {{ num_authors }}</li>
   </ul>
 
 {% endblock %}
