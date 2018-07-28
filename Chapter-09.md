@@ -145,32 +145,14 @@ index模版将需要标准的HTML标记头部和正文，以及用于导航的�
       {% block sidebar %}
       <ul class="sidebar-nav">
           <li><a href="{% url 'index' %}">首页</a></li>
-          <li><a href="{% url 'books' %}">图书</a></li>
-          <li><a href="{% url 'authors' %}">作者</a></li>
+          <li><a href="">图书</a></li>
+          <li><a href="">作者</a></li>
       </ul>
      {% endblock %}
       </div>
       <div class="col-sm-10 ">
       {% block content %}{% endblock %}
 
-  
-      {% block pagination %}
-        {% if is_paginated %}
-            <div class="pagination">
-                <span class="page-links">
-                    {% if page_obj.has_previous %}
-                        <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
-                    {% endif %}
-                    <span class="page-current">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                    </span>
-                    {% if page_obj.has_next %}
-                        <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
-                    {% endif %}
-                </span>
-            </div>
-        {% endif %}
-      {% endblock %} 
       </div>
     </div>
 
@@ -357,7 +339,7 @@ template_name 更改默认的模板名称
 
 
 ```
-<li><a href="{% url 'books' %}">All books</a></li>
+<li><a href="{% url 'books' %}">图书</a></li>
 ```
 
 ### 书本详细信息页面
@@ -382,7 +364,7 @@ urlpatterns = [
 基于类的通用详细信息视图，需要传递一个名为 pk 的参数。如果您正在编写自己的函数视图，则可以使用您喜欢的任何参数名称，或者，确实也可以，在未命名的参数中传递信息
 
 **View (基于类)**
-打开 catalog / views.py，并将以下代码复制到文件的底部
+打开 catalog/views.py，并将以下代码复制到文件的底部
  
 ```
 class BookDetailView(generic.DetailView):
