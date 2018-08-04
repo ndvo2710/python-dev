@@ -20,7 +20,7 @@ Django使用包含特殊session ID的cookie，来识别每个浏览器，及其�
 
 django项目默认会启用session
 
-配置在项目文件（locallibrary / locallibrary / settings.py）的INSTALLED_APPS 和 MIDDLEWARE 部分中设置，如下所示
+配置在项目文件（locallibrary/locallibrary/settings.py）的INSTALLED_APPS 和 MIDDLEWARE 部分中设置，如下所示
 
 ```
 INSTALLED_APPS = [
@@ -232,7 +232,7 @@ LOGIN_REDIRECT_URL = '/'
 如果打开登出网址（http://127.0.0.1:8000/accounts/logout/），那么会看到一些奇怪的行为 - 所属的用户肯定会被登出，但您将被带到管理员登出页面。这不是想要的，只是因为该页面上的登录链接，带到管理员登录屏幕（并且仅对具有is_staff权限的用户可用）。
 
 创建并打开 locallibrary/templates/registration/logged_out.html。将下面的文字，复制到文档中：
-```
+```````
 {% extends "base_generic.html" %}
 
 {% block content %}
@@ -316,9 +316,9 @@ http://127.0.0.1:8000/accounts/password_change/
 
 ### 模板
 
-可以使用{{ user }}模板变量，以获取有关模板中，当前登录用户的信息（默认情况下，在我们在骨架中设置项目时，会将其添加到模板上下文中）。
+可以使用`{{ user }}`模板变量，以获取有关模板中，当前登录用户的信息（默认情况下，在我们在骨架中设置项目时，会将其添加到模板上下文中）。
 
-通常，您将首先针对\ {{ user.is_authenticated }}模板变量进行测试，以确定用户是否有资格查看特定内容。为了证明这一点，接下来我们将更新侧边栏以在用户未登录时显示“登录”链接，如果他们已登录则显示“退出”链接。
+通常，您将首先针对`{ user.is_authenticated }}`板变量进行测试，以确定用户是否有资格查看特定内容。为了证明这一点，接下来我们将更新侧边栏以在用户未登录时显示“登录”链接，如果他们已登录则显示“退出”链接。
 
 打开基本模板（/locallibrary/catalog/templates/base_generic.html）并将以下文本复制到侧边栏块中，紧接在endblock模板标记之前
 
