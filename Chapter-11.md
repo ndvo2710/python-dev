@@ -110,7 +110,7 @@ def user_login(request):
             return render(request,"login.html",{"msg": msg})
 ```
 
-#### 登录template
+#### 登录template login.html
 
 ```
 <!DOCTYPE html>
@@ -199,7 +199,7 @@ def user_login(request):
 
 ```
 
-### 创建base模板
+### 创建base模板 base.html
 
 ```
 <!DOCTYPE html>
@@ -369,7 +369,7 @@ def index(request):
     return render(request,"index.html")
 ```
 
-#### index template
+#### index template index.html
 ```
 {% extends "base.html" %} 
 {% block content %}
@@ -446,7 +446,7 @@ class ProjectListView(LoginRequiredMixin, generic.ListView):
     template_name ='project/project_list.html'
     paginate_by = 10
 ```
-项目列表模板
+项目列表模板  
 
 ```
 {% extends "base.html" %} {% block content %} {% if object_list %}
@@ -806,3 +806,6 @@ def project_create(request):
 ```
 <button onclick="location.href='{% url 'project_create' %}'" type="button" class="btn btn-primary btn-xs">新建项目</button>
 ```
+
+## 练习
+项目列表添加分页功能

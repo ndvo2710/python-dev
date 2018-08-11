@@ -110,7 +110,7 @@ def project_create(request):
                 except ObjectDoesNotExist:
                     errmsg = "项目成员%s不存在" % username
                     #return HttpResponse(len(project_member_str.strip()))
-                    return render(request, "project/project_form.html",{"project": project, "errmsg": errmsg})
+                    return render(request, "project/project_form.html", {"errmsg": errmsg})
             project_member = ','.join(member_list)
         else:
             project_member=""
