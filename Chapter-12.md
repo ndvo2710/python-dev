@@ -486,7 +486,7 @@ def httpapi_list(request, pk):
                     <p>
                         <button onclick="location.href='{% url 'httpapi_create' project.id %}'" type="button" class="btn btn-primary btn-xs">新建接口</button>
                     </p>
-                </div>
+               </div>
             <div class="panel-body">
                 <div class="table">
                     <table class="table  table-sm   table-hover" id="dataTables-example">
