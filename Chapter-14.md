@@ -75,6 +75,13 @@ function ok(){
 <a class="playitbtn tryitbtnsyntax" href={% url "httpapi_delete" project.id object.id %}>删除</a>
 ```
 
+更新视图httpapi_delete
+```
+
+#return HttpResponse("delete ok")
+return redirect("httpapi_list",project.id)
+```
+
 ## 测试集合管理
 
 创建包含多个接口的测试集合,运行测试集合,查看测试运行结果
@@ -273,6 +280,12 @@ project/test_list.html
 <li class="nav-item">
     <a class="nav-link" href={% url "test_list" project.id %}>api测试</a>
 </li>
+```
+
+更新test_create函数
+```
+#return HttpResponse(httpapis)
+        return redirect("test_list",project.id)
 ```
 
 ### 运行测试集合
@@ -507,4 +520,10 @@ def test_result(request, project_id, test_id):
 更新test_list.html
 ```
 <a class="playitbtn tryitbtnsyntax" href="{% url 'test_result' project.id object.id %}">结果</a>
+```
+
+更新test_run 函数
+```
+#return HttpResponse(httprunresults)
+return redirect("test_result",project_id, test_id)
 ```
