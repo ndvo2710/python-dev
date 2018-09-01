@@ -176,7 +176,7 @@ def httpapi_run(request, project_id, httpapi_id):
                                       assertResult = assertresult
                                       )
         httprunresult.save()
-        #return HttpResponse("result add ok")
+        return HttpResponse("result add ok")
 ```
 完成后编辑httapi接口，点击运行
 ### 模板httpapi_result.html
