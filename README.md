@@ -7,8 +7,7 @@
 * 使用面向对象编写通讯录程序
 * python序列化pickle
 * 使用pickle来保持通讯录数据文件
-* python 日志logging
-* 使用logging来记录通信录操作
+
 
 ### 第二天
 * 递归
@@ -28,10 +27,56 @@
 * 协程
 * 练习实现http一个压力测试脚本3
 
-
+## html和css
 ### 第四天
-* 构建一个django项目
-* url，view，template
-* 实现一个hello world
-* model
+* html概述
+* html元素属性
+* html 处理文本
+* html 超链接
+* html 文档结构
+
+### 第五天
+* html中的音频，视频，图片
+* html 表格基础
+* html 高级表格
+* html 表单基础
+* html 高级表单
+
+### 第六天
+* css概述
+* css语法
+* css选择器
+* 盒子模型
+
+### 第七天
+* 格式化文本
+* 格式化列表
+* 格式话区块
+* css排版
+
+### 第八天
+* bootstrap介绍
+* bootstrap布局
+* bootrap组件
+
+## 9-11天
+通过一个图书管理项目来入门django
+
+* 网站架构
+* 数据库和模型
+* djangoadmin 管理站点
+* 视图和模板
+* 认证与授权
+
+### 12-15天
+实战： 自动化接口测试平台
+
+* 项目管理
+* 接口管理
+* 测试集合管理
+* 测试报告
+* 用户管理
+* 认证授权
+* dashboard
+
 
