@@ -1,535 +1,454 @@
 # 第四天
-##  Django介绍
-Django是一个高级Python Web框架，鼓励快速开发和实用的设计。
-由经验丰富的开发人员开发，它可以处理Web开发的大部分问题，
-因此可以专注于编写应用程序，而无需重新发明轮子。
-
-Django 特点
-1.  快速: Django旨在帮助开发人员尽可能快地完成应用程序
-2.  安全: Django严肃对待安全并帮助开发人员避免许多常见的安全错误
-3.  可伸缩:  Django快速灵活扩展的能力
-4.  丰富的组件: Django 内置各种web开发常用功能组件
-
-## Django安装
-使用pycharm安装Django
-File=>Setting=>Project:项目名=>Project Interpreter=>点击右侧+号= >在搜索框输入django=> 在列表中选中django=>点击install
-
-使用pip
-````
-pip install django
-````
-
-验证django
-````
->>> import django
->>> django.get_version()
-'2.0.5'
-
-````
-
-## 创建一个项目
-
-在pycharm Terminal中输入
-````
-django-admin startproject mysite
-````
-
-项目结构
-````
-└── mysite
-    ├── manage.py
-    └── mysite
-        ├── __init__.py
-        ├── settings.py
-        ├── urls.py
-        └── wsgi.py
-
-````
-+ 顶部mysite:  项目根目录。 它的名字与Django无关; 你可以将它重命名为任何你喜欢的名字
-+ manager.py: 一个命令行实用程序，可让您以各种方式与此Django项目进行交互。
-+ 内部mysite: 项目的实际Python包。 它的名字是你需要用来导入任何东西的Python包名
-+ mysite/__init__.py: 一个空文件，告诉Python这个目录应该被视为一个Python包
-+ mysite/settings.py:  这个Django项目的配置文件
-+ mysite/urls.py:  这个Django项目的URL声明
-+ mysite/wsgi.py:  WSGI兼容的Web服务器,为项目提供服务的入口点
-
-以开发模式运行服务器
-
-````
-cd mysite
-python manage.py runserver
-````
-
-访问django项目
-在浏览器打开http://127.0.0.1:8000
-
-修改开发服务器默认端口
-````
-d mysite
-ython manage.py runserver 8080
-````
-
-默认开发服务器监听127.0.0.1
-修改监听ip
-````
-python manage.py runserver 0:8000
-````
-
-## 创建第一个app
-项目和应用程序有什么区别？ 应用程序是一种Web应用程序，它可以执行某些操作，
-例如博客系统，公共记录数据库或简单的民意调查应用程序。 
-项目是特定网站的配置和应用程序的集合。 项目可以包含多个应用程序。
-
-````
-python manage.py startapp myapp
-````
-
-myapp目录结构
-
-````
-myapp
-├── admin.py
-├── apps.py
-├── __init__.py
-├── migrations
-│   └── __init__.py
-├── models.py
-├── tests.py
-└── views.py
-````
-
-admin.py  将models注册到djangoadmin
-apps.py  app 配置
-__init__.py  表明该文件夹为包
-migrations  数据库版本升级
-models.py 数据库管理
-tests.py  测试文件
-views  视图文件
+##  爬虫
+### 爬虫基础知识
+1. HTTP原理
+2. 网页的基础知识
+3. 爬虫基础原理
 
-编辑myapp/views.py
-````
-from django.http import HttpResponse
+#### URI和URL
 
-# Create your views here.
+URI的全称为Uniform Resource Identifier，即统一资源标志符，URL的全称为Universal Resource Locator，即统一资源定位符
 
+举例来说，https://github.com/favicon.ico 是GitHub的网站图标链接，它是一个URL，也是一个URI。即有这样的一个图标资源，我们用URL/URI来唯一指定了它的访问方式，这其中包括了访问协议https、访问路径（/即根目录）和资源名称favicon.ico。通过这样一个链接，我们便可以从互联网上找到这个资源，这就是URL/URI。
 
-def index(request):
-    return HttpResponse("Hello world,You're at myapp index")
-````
+URL是URI的子集，也就是说每个URL都是URI，但不是每个URI都是URL。那么，怎样的URI不是URL呢？URI还包括一个子类叫作URN，它的全称为Universal Resource Name，即统一资源名称。URN只命名资源而不指定如何定位资源，比如favicon.ico只是个文件名称
 
-创建myapp/urls.py
+URI可以分为URL,URN或同时具备locators 和names特性的一个东西。URN作用就好像一个人的名字，URL就像一个人的地址。换句话说：URN确定了东西的身份，URL提供了找到它的方式。”
 
-````
-from django.urls import path
+[img](./Chapter-04-code/pics/url-uri-miessler2018-e1541689316436.png)
 
-from .  import views
 
 
-urlpatterns = [
-    path('', views.index, name='index')
-]
+#### http和https
 
-````
-编辑mysite/urls.py
+HTTP的全称是Hyper Text Transfer Protocol，中文名叫作超文本传输协议
+HTTPS的全称是Hyper Text Transfer Protocol over Secure Socket Layer，是以安全为目标的HTTP通道，简单讲是HTTP的安全版，即HTTP下加入SSL层，简称为HTTPS。
 
-````
-from django.contrib import admin
-from django.urls import path, include
+HTTP请求过程
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('myapp/', include('myapp.urls'))
-]
-````
+[img](./Chapter-04-code/pics/1522052700.jpg)
 
-path 函数定义了4个参数， 两个必须的，route和view，两个可选的name和kwargs
+http请求方法
 
-**path()参数 route**
+常见的请求方法有两种：GET和POST
+其它请求方法
 
-路由是一个包含URL模式的字符串。处理请求时，Django从urlpatterns中的第一个模式开始，
-并在列表中向下，并将请求的URL与每个模式进行比较，直到找到匹配的模式。
-不搜索GET和POST参数或域名。
-例如，在https://www.example.com/myapp/的请求中，URLconf将查找myapp/。
- 在https://www.example.com/myapp/?page=3的请求中，URLconf也会查找myapp/。
- 
-**path() 参数view**
-当Django找到匹配的模式时，它将HttpRequest对象作为第一个参数，并
-将路由中的任何“捕获”值作为关键字参数调用指定的视图函数。
- 
-**patch() 参数name**
- 
-命名URL可以让你从Django其他地方明确地引用它，特别是在模板中
+[img](./Chapter-04-code/pics/1522052793.jpg)
 
+请求报文
 
-## 数据库配置
+[img](./Chapter-04-code/pics/143006_LICd_1469576.jpg)
 
-mysite/settings.py。这是一个ython模块，用于Django配置
-
-
-默认情况下，配置使用SQLite。如果你是数据库新手，或者你只是想尝试Django，这是最简单的选择
-SQLite包含在Python中，所以你不需要安装其他任何东西来支持你的数据库，
-然而，当开始你的第一个真正的项目时，你可能想要使用像MySQL这样的更具可扩展性的数据库。
-如果您想使用其他数据库，请安装适当的数据库绑定，并在DATABASES的default项中更改以下键以匹配数据库连接
-
-+ ENGINE: 可用的配置有'django.db.backends.sqlite3', 'django.db.backends.postgresql', 'django.db.backends.mysql', 
-'django.db.backends.oracle' 等
-+ NAME: 数据库的名称
-+ HOST: 数据库主机名
-+ USER: 数据库用户名
-+ PASSWORD: 数据库密码
-
-### 创建 models
-
-模型 - 数据库布局以及其他元数据
-
-在我们的app里我们将创建两个models:   Question 和 Choice
-Question 包含一个问题和创建问题的时间
-Choice 包含一个选项和选项的的票数
-每个Choice都和一个Question关联
-
-Models 通过python类来定义，编辑文件myapp/models.py
-
-````
-from django.db import models
-
-
-class Question(models.Model):
-    question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
-
-
-class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choice_text = models.CharField(max_length=200)
-    votes = models.IntegerField(default=0)
-````
-代码很简单。每个模型都由代表django.db.models.Model的子类表示。
-每个模型都有许多类变量，每个变量表示模型中的数据库字段。
-
-每个字段由一个Field类的实例表示 - 例如，字符字段的CharField和日期时间的DateTimeField。
-这告诉Django每个字段拥有什么类型的数据。
-
-每个Field实例的名称（例如question_text或pub_date）是机器友好格式的字段名称。
-你将在你的Python代码中使用此值，并且你的数据库将使用它作为列名称。
-
-你可以使用字段的可选第一个位置参数来指定一个人类可读的名称，
-在这个例子中，我们只为Question.pub_date定义了一个人类可读的名字
-
-某些Field类需要参数。例如，CharField要求你给它一个max_length，
-字段还可以通过default参数设置默认值如例子中的votes字段默认值为0
-
-最后，请注意使用ForeignKey定义的关系。这告诉Django每个Choice都与单个 Question有关。 
-Django支持所有常见的数据库关系：多对一，多对多和一对一
-
-### 应用models
-
-这一小部分模型代码为Django提供了大量信息。有了它，Django能够
-+ 为此应用程序创建数据库模式（CREATE TABLE语句）
-+ 创建一个用于访问Question和Choice对象的Python数据库访问API
-
-但首先我们需要告诉我们的项目，myapp应用程序已安装
-
-打开mysite/settings.py，INSTALLED_APPS设置如下：
-````
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-]
-````
-默认情况下，INSTALLED_APPS包含以下应用程序，所有这些应用程序都与Django一起提供
-+ django.contrib.admin - 管理网站
-+ django.contrib.auth - 一个认证系统。
-+ django.contrib.contenttypes - 内容类型的框架。
-+ django.contrib.sessions - 会话框架
-+ django.contrib.messages - 一个消息框架。
-+ django.contrib.staticfiles - 管理静态文件的框架。
-
-其中一些应用程序至少使用了一个数据库表，所以我们需要在数据库中创建表格，
-然后才能使用它们。为此，请运行以下命令
-````
-python manage.py migrate
-
-# 返回内容
-Operations to perform:
-  Apply all migrations: admin, auth, contenttypes, sessions
-Running migrations:
-  Applying contenttypes.0001_initial... OK
-  Applying auth.0001_initial... OK
-  Applying admin.0001_initial... OK
-  Applying admin.0002_logentry_remove_auto_add... OK
-  Applying contenttypes.0002_remove_content_type_name... OK
-  Applying auth.0002_alter_permission_name_max_length... OK
-  Applying auth.0003_alter_user_email_max_length... OK
-  Applying auth.0004_alter_user_username_opts... OK
-  Applying auth.0005_alter_user_last_login_null... OK
-  Applying auth.0006_require_contenttypes_0002... OK
-  Applying auth.0007_alter_validators_add_error_messages... OK
-  Applying auth.0008_alter_user_username_max_length... OK
-  Applying auth.0009_alter_user_last_name_max_length... OK
-  Applying sessions.0001_initial... OK
-````
-
-
-编辑我们的mysite/settings.py，我们需要在INSTALLED_APPS设置中添加对其配置类的引用
-MyappConfig类位于myapp/apps.py文件中，因此它的相对路径是'myapp.apps.PollsConfig'
-
-````
-INSTALLED_APPS = [
-    'myapp.apps.MyappConfig',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-]
-````
-
-
-现在Django知道myapp应用程序。让我们运行另一个命令
-````
-python manage.py makemigrations myapp
-
-# 返回内容
-Migrations for 'myapp':
-  myapp\migrations\0001_initial.py
-    - Create model Choice
-    - Create model Question
-    - Add field question to choice
-
-````
-
-通过运行makemigrations，您告诉Django你已经对模型进行了一些更改，
-并且希望将这些更改存储为migrations。
-
-migrations是Django如何将更改变更到数据库 - 它们只是磁盘上的文件
-如果你喜欢，你可以阅读新模型的migrations;myapp/migrations/0001_initial.py
-
-有一个命令可以为你运行migrationgs并自动管理你的数据库- 这就是所谓的migrate
-我们稍后会介绍它 - 但首先，我们来看看migrate过程将运行的SQL。 
-sqlmigrate命令使用migration 名称并返回它们的SQL：
-
-````
-python manage.py sqlmigrate myapp 0001
-
-# 返回
-BEGIN;
---
--- Create model Choice
---
-CREATE TABLE "myapp_choice" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "choice_text" varchar(200) NOT NULL, "votes" integer NOT NULL);
---
--- Create model Question
---
-CREATE TABLE "myapp_question" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "question_text" varchar(200) NOT NULL, "pub_date" datetime NOT NULL);
---
--- Add field question to choice
---
-ALTER TABLE "myapp_choice" RENAME TO "myapp_choice__old";
-CREATE TABLE "myapp_choice" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "choice_text" varchar(200) NOT NULL, "votes" integer NOT NULL, "question_id" integer
- NOT NULL REFERENCES "myapp_question" ("id") DEFERRABLE INITIALLY DEFERRED);
-INSERT INTO "myapp_choice" ("id", "choice_text", "votes", "question_id") SELECT "id", "choice_text", "votes", NULL FROM "myapp_choice__old";
-DROP TABLE "myapp_choice__old";
-CREATE INDEX "myapp_choice_question_id_6149fbd4" ON "myapp_choice" ("question_id");
-COMMIT;
-
-````
-
-+ 输出取决于不通的数据库，我们现在是默认的sqllite
-+ 表名是通过组合应用程序的名称（myapp）和模型的小写名称（question，choice自动生成的
-+ 主键（ID）会自动添加
-+ 按照惯例，Django将“_id”附加到外键字段名称
-+ sqlmigrate命令实际上不会对数据库做任何操作，只是输出migrations中包含的SQL语句
-
-现在执行migrate
-
-````
-python manage.py migrate
-
-# 返回内容
-Operations to perform:
-  Apply all migrations: admin, auth, contenttypes, myapp, sessions
-Running migrations:
-  Applying myapp.0001_initial... OK
-  
-````
-
-migrate命令会应用所有尚未应用的migrations，本质上是将你对模型所做的更改与数据库同步
-
-migrations功能非常强大，您可以随着时间的推移更改模型，
-而无需删除数据库或表格并创建新的数据库，专门用于实时升级数据库，而不会丢失数据
-
-请记住进行数据库更改三步
-+ 更改你的models（models.py）
-+ 执行python manage.py makemigrations 为这些更改创建migrations
-+ 执行 python manage.py migrate 应用变更到数据库
-
-### 数据库api
-
-现在，让我们使用交互式Python shell。要调用Python shell，请使用以下命令
-````
-python manage.py shell
-# 返回内容
-Python 3.6.2 (v3.6.2:5fd33b5, Jul  8 2017, 04:14:34) [MSC v.1900 32 bit (Intel)] on win32
-Type "help", "copyright", "credits" or "license" for more information.
-(InteractiveConsole)
->>>
-
->>> from myapp.models import Choice, Question  # 导入我们的模型类
->>> Question.objects.all() # 查询question表，现在还没有内容
-<QuerySet []>
-# 插入一条记录
->>> from django.utils import timezone
->>> q = Question(question_text="What's new?", pub_date=timezone.now())
->>> q.save()
->>> q.id
-1
->>> q.question_text
-"What's new?"
->>> q.pub_date
-datetime.datetime(2018, 5, 20, 5, 41, 9, 912096, tzinfo=<UTC>)
-# 修改字段的值
->>> q.question_text = "What's up?"
->>> q.save()
->>> Question.objects.all()
-<QuerySet [<Question: Question object (1)>]>
-````
-<Question: Question object (1)>  这是个什么鬼？完全不可读
-让我们通过编辑myapp/models.py文件，将__str __（）方法添加到Question和Choice中来解决这个问题
-````
-from django.db import models
-
-
-class Question(models.Model):
-    question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
-
-    def __str__(self):
-        return self.question_text
-
-
-class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choice_text = models.CharField(max_length=200)
-    votes = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.choice_text
-````
-
-再次打开shell
-````
->>> from myapp.models import Choice, Question
->>> Question.objects.all()
-<QuerySet [<Question: What's up?>]>
-# Django提供了完全由关键字参数驱动的丰富的数据库查找API
->>> Question.objects.filter(id=1)
-<QuerySet [<Question: What's up?>]>
->>> from django.utils import timezone
->>> current_year = timezone.now().year
->>> Question.objects.get(pub_date__year=current_year) #只有一条记录是才能使用get
-<Question: What's up> 
-# 如果记录不存在get放回异常
->>> Question.objects.get(id=2)
-...
-myapp.models.DoesNotExist: Question matching query does not exist.
-
-# 通过主键查找是最常见的情况
-# 以下内容与Question.objects.get(id = 1)相同
->>> q = Question.objects.get(pk=1)
->>> q.question_text
-"What's up"
-# 显示相关对象集（Choice）中的所有记录 - 目前为止没有
->>> q.choice_set.all()
-<QuerySet []>
-# 创建三个选项
->>> q.choice_set.create(choice_text='Not much', votes=0)
-<Choice: Not much>
->>> q.choice_set.create(choice_text='The sky', votes=0)
-<Choice: The sky>
->>> c = q.choice_set.create(choice_text='Just hacking again', votes=0)
-# 选项所关联的问题
->>> c.question
-<Question: What's up>
-# 问题所有的选项
->>> q.choice_set.all()
-<QuerySet [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]>
->>> q.choice_set.count()
-3
-Choice.objects.filter(question__pub_date__year=current_year)
->>> c = q.choice_set.filter(choice_text__startswith='Just hacking')
->>> c.delete()
-(1, {'myapp.Choice': 1})
-````
-
-### djnago admin
-
-创建一个管理员用户
-````
- python manage.py createsuperuser
-````
-
-启动开发服务器
-````
-python manage.py runserver
-````
-在浏览器输入http://127.0.0.1/admin
-
-**使admin可以修改myapp的数据**
-
-只需做一件事：我们需要告诉管理员Question对象具有管理界面。
-要做到这一点，打开polls / admin.py文件，并编辑
-````
-from django.contrib import admin
-
-from .models import Question
-
-admin.site.register(Question)
-
-````
-然后刷新浏览器页面，就可以看到Question
-![image](./Chapter-04-code/pics/admin-1.jpg)
-点击Question,现在你在“更改列表”页面。
-此页面显示数据库中的所有问题，并让你选择一个来更改
-![image](./Chapter-04-code/pics/admin-2.jpg)
-点击“What's up？”来编辑它
-![image](./Chapter-04-code/pics/admin-3.jpg)
-
-+ 表单是从Question模型自动生成的
-+ 不同的模型字段类型（DateTimeField，CharField）对应于相应的HTML输入小部件。
-每种类型的领域都知道如何在Django管理中显示自己
-
-作业： 大家把数据库换成mysql,创建数据库mysite,执行migrate，
-去查看mysql看是否建立对应表
-
-创建mysite数据库
-安装mysqlconnect模块
-配置settings.py 
-````
-DATABASES = {
-    'default': {
-       # 'ENGINE': 'django.db.backends.sqlite3',
-       # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mysite',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    }
+状态码
+
+[img](./Chapter-04-code/pics/1522052892.jpg)
+
+
+#### 网页组成
+
+网页可以分为三大部分——HTML、CSS和JavaScript
+HTML是用来描述网页的一种语言，其全称叫作Hyper Text Markup Language，即超文本标记语言。网页包括文字、按钮、图片和视频等各种复杂的元素
+
+不同类型的文字通过不同类型的标签来表示，如图片用img标签表示，视频用video标签表示，段落用p标签表示，它们之间的布局又常通过布局标签div嵌套组合而成，各种标签通过不同的排列和嵌套才形成了网页的框架
+
+HTML定义了网页的结构，但是只有HTML页面的布局并不美观，可能只是简单的节点元素的排列，为了让网页看起来更好看一些，这里借助了CSS。
+
+CSS，全称叫作Cascading Style Sheets，即层叠样式表。“层叠”是指当在HTML中引用了数个样式文件，并且样式发生冲突时，浏览器能依据层叠顺序处理。“样式”指网页中文字大小、颜色、元素间距、排列等格式
+
+JavaScript，简称JS，是一种脚本语言。HTML和CSS配合使用，提供给用户的只是一种静态信息，缺乏交互性。我们在网页里可能会看到一些交互和动画效果，如下载进度条、提示框、轮播图等，这通常就是JavaScript的功劳
+
+#### 爬虫基础原理
+
+简单来说，爬虫就是获取网页并提取和保存信息的自动化程序，下面概要介绍一下。
+
+1. 获取网页
+
+爬虫首先要做的工作就是获取网页，这里就是获取网页的源代码。源代码里包含了网页的部分有用信息，所以只要把源代码获取下来，就可以从中提取想要的信息了。
+
+前面讲了请求和响应的概念，向网站的服务器发送一个请求，返回的响应体便是网页源代码。所以，最关键的部分就是构造一个请求并发送给服务器，然后接收到响应并将其解析出来，那么这个流程怎样实现呢？总不能手工去截取网页源码吧？
+
+不用担心，Python提供了许多库来帮助我们实现这个操作，如urllib、requests等。我们可以用这些库来帮助我们实现HTTP请求操作，请求和响应都可以用类库提供的数据结构来表示，得到响应之后只需要解析数据结构中的Body部分即可，即得到网页的源代码，这样我们可以用程序来实现获取网页的过程了。
+
+2. 提取信息
+
+获取网页源代码后，接下来就是分析网页源代码，从中提取我们想要的数据。首先，最通用的方法便是采用正则表达式提取，这是一个万能的方法，但是在构造正则表达式时比较复杂且容易出错。
+
+另外，由于网页的结构有一定的规则，所以还有一些根据网页节点属性、CSS选择器或XPath来提取网页信息的库，如Beautiful Soup、pyquery、lxml等。使用这些库，我们可以高效快速地从中提取网页信息，如节点的属性、文本值等。
+
+提取信息是爬虫非常重要的部分，它可以使杂乱的数据变得条理清晰，以便我们后续处理和分析数据。
+
+3. 保存数据
+
+提取信息后，我们一般会将提取到的数据保存到某处以便后续使用。这里保存形式有多种多样，如可以简单保存为TXT文本或JSON文本，也可以保存到数据库，如MySQL和MongoDB等，也可保存至远程服务器，如借助SFTP进行操作等。
+
+4. 自动化程序
+
+说到自动化程序，意思是说爬虫可以代替人来完成这些操作。首先，我们手工当然可以提取这些信息，但是当量特别大或者想快速获取大量数据的话，肯定还是要借助程序。爬虫就是代替我们来完成这份爬取工作的自动化程序，它可以在抓取过程中进行各种异常处理、错误重试等操作，确保爬取持续高效地运行。
+
+
+#### 静态页面
+在网页中我们能看到各种各样的信息，最常见的便是常规网页，它们对应着HTML代码，而最常抓取的便是HTML源代码。
+
+另外，可能有些网页返回的不是HTML代码，而是一个JSON字符串（其中API接口大多采用这样的形式），这种格式的数据方便传输和解析，它们同样可以抓取，而且数据提取更加方便。
+
+此外，我们还可以看到各种二进制数据，如图片、视频和音频等。利用爬虫，我们可以将这些二进制数据抓取下来，然后保存成对应的文件名。
+
+另外，还可以看到各种扩展名的文件，如CSS、JavaScript和配置文件等，这些其实也是最普通的文件，只要在浏览器里面可以访问到，就可以将其抓取下来。
+
+上述内容其实都对应各自的URL，是基于HTTP或HTTPS协议的，只要是这种数据，爬虫都可以抓取。
+
+#### 动态页面
+
+有时候，我们在用urllib或requests抓取网页时，得到的源代码实际和浏览器中看到的不一样。
+
+这是一个非常常见的问题。现在网页越来越多地采用Ajax、前端模块化工具来构建，整个网页可能都是由JavaScript渲染出来的，也就是说原始的HTML代码就是一个空壳
+比如 https://www.12306.cn/index/
+
+#### 带认证的页面
+
+HTTP的一个特点，叫作无状态。HTTP的无状态是指HTTP协议对事务处理是没有记忆能力的，也就是说服务器不知道客户端是什么状态。当我们向服务器发送请求后，服务器解析此请求，然后返回对应的响应，服务器负责完成这个过程，而且这个过程是完全独立的，服务器不会记录前后状态的变化，也就是缺少状态记录。
+
+两个用于保持HTTP连接状态的技术就出现了，它们分别是会话和Cookies。会话在服务端，也就是网站的服务器，用来保存用户的会话信息；Cookies在客户端，也可以理解为浏览器端，有了Cookies，浏览器在下次访问网页时会自动附带上它发送给服务器，服务器通过识别Cookies并鉴定出是哪个用户，然后再判断用户是否是登录状态，然后返回对应的响应。
+
+
+我们可以理解为Cookies里面保存了登录的凭证，有了它，只需要在下次请求携带Cookies发送请求而不必重新输入用户名、密码等信息重新登录了。
+
+因此在爬虫中，有时候处理需要登录才能访问的页面时，我们一般会直接将登录成功后获取的Cookies放在请求头里面直接请求，而不必重新模拟登录
+
+#### 代理的基本原理
+
+我们在做爬虫的过程中经常会遇到这样的情况，最初爬虫正常运行，正常抓取数据，一切看起来都是那么美好，然而一杯茶的功夫可能就会出现错误，比如403 Forbidden，这时候打开网页一看，可能会看到“您的IP访问频率太高”这样的提示。出现这种现象的原因是网站采取了一些反爬虫措施。比如，服务器会检测某个IP在单位时间内的请求次数，如果超过了这个阈值，就会直接拒绝服务，返回一些错误信息，这种情况可以称为封IP
+
+代理实际上指的就是代理服务器，proxy server，它的功能是代理网络用户去取得网络信息。在我们正常请求一个网站时，是发送了请求给Web服务器，Web服务器把响应传回给我们。如果设置了代理服务器，实际上就是在本机和服务器之间搭建了一个桥，此时本机不是直接向Web服务器发起请求，而是向代理服务器发出请求，请求会发送给代理服务器，然后由代理服务器再发送给Web服务器，接着由代理服务器再把Web服务器返回的响应转发给本机。这样我们同样可以正常访问网页，但这个过程中Web服务器识别出的真实IP就不再是我们本机的IP了，就成功实现了IP伪装，这就是代理的基本原理
+
+1. 突破自身IP访问限制，访问一些平时不能访问的站点。
+
+2. 访问一些单位或团体内部资源：比如使用教育网内地址段免费代理服务器，就可以用于对教育网开放的各类FTP下载上传，以及各类资料查询共享等服务。
+
+3. 提高访问速度：通常代理服务器都设置一个较大的硬盘缓冲区，当有外界的信息通过时，同时也将其保存到缓冲区中，当其他用户再访问相同的信息时，则直接由缓冲区中取出信息，传给用户，以提高访问速度。
+
+4. 隐藏真实IP：上网者也可以通过这种方法隐藏自己的IP，免受攻击。对于爬虫来说，我们用代理就是为了隐藏自身IP，防止自身的IP被封锁。
+
+对于爬虫来说，由于爬虫爬取速度过快，在爬取过程中可能遇到同一个IP访问过于频繁的问题，此时网站就会让我们输入验证码登录或者直接封锁IP，这样会给爬取带来极大的不便。
+
+使用代理隐藏真实的IP，让服务器误以为是代理服务器在请求自己。这样在爬取过程中通过不断更换代理，就不会被封锁，可以达到很好的爬取效果。
+
+### 爬虫基础模块
+
+爬虫的第一步就是要模拟浏览器发出请求，python实现http协议的模块有 urllib、requests等常用模块
+
+#### 使用urllib
+
+[urllib](https://docs.python.org/3/library/urllib.html)
+文档
+
+在python2中有urllib和urllib2,python3 中统一为urllib。它是python内置的库，不需要额外安装。
+urllib包含了4个模块
+
+1. request： 他是最基本的http请求模块，可以用来发送请求，取得相应结果
+2. error： 异常处理模块，如果请求出错我们可以捕获异常，进行处理
+3. parse： 对url进行处理
+4. roboparser：主要用来识别网站的robots.txt文件，判断哪些网页可以爬，哪些不可以怕
+
+##### 发送请求
+
+1. urlopen()
+```
+from urllib import request
+
+r = request.urlopen("https://www.163.com")
+print(r.read().decode('gbk'))
+```
+
+r 是个HTTPResponse类的对象，主要包含read()、readinto()、getheader(name)、getheaders()、fileno()等方法，以及msg、version、status、reason等属性
+
+```
+from urllib import request
+
+r = request.urlopen("https://www.163.com")
+print(r.status)
+print(r.getheaders())
+print(r.getheader('Server'))
+```
+
+最基本的方法可以完成简单的get请求
+
+data参数
+
+data参数是可选的，设置了该参数请求方法就不再是get而是post
+
+发送一个表单请求 application/x-www-form-urlencoded
+
+```
+from urllib import request, parse
+
+data = bytes(parse.urlencode({'name': 'test'}), encoding='utf-8')
+r = request.urlopen('http://httpbin.org/post', data=data)
+print(r.read().decode())
+```
+
+timeout参数指定超时时间，单位是秒，如果超过了这个时间还没有得到响应就抛出异常
+
+```
+from urllib import request, parse
+
+r = request.urlopen('http://httpbin.org/get', timeout=0.1)
+print(r.read().decode())
+```
+进行异常处理
+```
+from urllib import request, parse, error
+
+try:
+    r = request.urlopen('http://httpbin.org/get', timeout=0.1)
+    print(r.read().decode())
+except error.URLError as e:
+    print(e.reason)
+```
+
+2. Request
+上面的方法可以完成一些简单的请求如何get和post表单，不能设置header，不支持其它请求方法
+如果需要自定义header或put、delete等方法就需要使用Request类来构造一个请求
+
+```
+from urllib import request
+
+rt = request.Request('https://python.org')
+re = request.urlopen(rt)
+print(re.read().decode())
+```
+
+自定义header
+```
+from urllib import request, parse
+
+url = 'http://httpbin.org/post'
+
+headers = {
+        'User-Agent': 'Mozilla/4.0',
 }
-````
-执行migrate
-执行 createsuperuser
-启动开发服务器
+
+d = {'name': 'test'}
+
+data = bytes(parse.urlencode(d), encoding='utf-8')
+
+req = request.Request(url,data,headers,method='POST')
+
+r = request.urlopen(req)
+
+print(r.read().decode())
+
+```
+
+3. 解析链接
+
+urlparse
+
+```
+from urllib.parse import urlparse
+
+result = urlparse('http://www.baidu.com/inex.html;user?id=5#comment')
+print(result)
+```
+
+unurlparse
+
+```
+from urllib.parse import urlunparse
+
+data = ['http', 'www.baidu.com', 'index.html', 'user', 'a=6', 'comment']
+print(urlunparse(data))
+```
+
+urljoin
+
+```
+from urllib.parse import urljoin
+
+print(urljoin('http://www.baidu.com', 'FAQ.html'))
+```
+
+urlencode
+
+```
+from urllib.parse import urlencode
+
+d = {'name': 'test'}
+
+print(urlencode(d))
+print(bytes(urlencode(d),encoding='utf-8'))
+```
+
+#### requests
+[requests](http://docs.python-requests.org/zh_CN/latest/user/quickstart.html)
+文档
+
+get 请求
+```
+import requests
+
+r = requests.get("https://www.baidu.com")
+print(r.text)
+print(r.status_code)
+print(r.cookies)
+```
+
+带参数的get请求
+
+```
+import requests
+
+data = {'name': 'test', 'age': 18}
+
+r = requests.get("http://httpbin.org/get", params=data)
+print(r.text)
+
+```
+
+post请求
+
+```
+import requests
+
+data = {'name': 'test', 'age': 18}
+
+r = requests.post("http://httpbin.org/post", data=data)
+print(r.text)
+
+```
+
+自定义header
+```
+import requests
+
+r = requests.get('https://www.zhihu.com/explore')
+print(r.text)
+
+import requests
+
+headers= {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36'
+}
+r = requests.get('https://www.zhihu.com/explore', headers=headers)
+
+print(r.text)
+```
+
+#### html解析库
+
+lxml
+
+```
+from lxml import etree
+
+text = '''
+<div>
+    <ul>
+         <li class="item-0"><a href="link1.html">first item</a></li>
+         <li class="item-1"><a href="link2.html">second item</a></li>
+         <li class="item-inactive"><a href="link3.html">third item</a></li>
+         <li class="item-1"><a href="link4.html">fourth item</a></li>
+         <li class="item-0"><a href="link5.html">fifth item</a>
+     </ul>
+ </div>
+'''
+htmlEmt = etree.HTML(text)
+print(htmlEmt)
+```
+
+使用xpath定位元素
+
+```
+from lxml import etree
+
+text = '''
+<div>
+    <ul>
+         <li class="item-0"><a href="link1.html">first item</a></li>
+         <li class="item-1"><a href="link2.html">second item</a></li>
+         <li class="item-inactive"><a href="link3.html">third item</a></li>
+         <li class="item-1"><a href="link4.html">fourth item</a></li>
+         <li class="item-0"><a href="link5.html">fifth item</a>
+     </ul>
+ </div>
+'''
+htmlEmt = etree.HTML(text)
+print(htmlEmt.xpath("//*"))
+```
+
+定位元素
+```
+print(htmlEmt.xpath("//li"))
+print(htmlEmt.xpath("//li/a"))
+```
+
+[xpath概念](http://www.w3school.com.cn/xpath/xpath_syntax.asp)
+
+通过属性定位
+
+```
+print(htmlEmt.xpath('//li[@class="item-0"]'))
+```
+
+获取属性值
+```
+print(htmlEmt.xpath('//li/@class'))
+```
+
+获取文本
+```
+print(htmlEmt.xpath('//li/a[@href="link1.html"]//text()'))
+```
+
+Beautiful Soup
+
+[bs4](https://beautifulsoup.readthedocs.io/zh_CN/v4.4.0/)文档
+
+```
+from bs4 import BeautifulSoup
+
+html_doc = """
+<html><head><title>The Dormouse's story</title></head>
+<body>
+<p class="title"><b>The Dormouse's story</b></p>
+
+<p class="story">Once upon a time there were three little sisters; and their names were
+<a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
+<a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
+<a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
+and they lived at the bottom of a well.</p>
+
+<p class="story">...</p>
+"""
+
+soup = BeautifulSoup(html_doc, 'html.parser')
+
+print(soup.title)
+print(soup.p)
+print(soup.p['class'])
+print(soup.find_all('a'))
+```
+
+[css选择器](http://www.w3school.com.cn/cssref/css_selectors.asp)
+
+抓取例子
+
+```
+from bs4 import BeautifulSoup
+import requests
 
 
+url = "https://movie.douban.com/"
 
+r = requests.get(url)
+html_doc = r.text
+soup = BeautifulSoup(html_doc, 'html.parser')
 
+element = soup.select('#billboard > div.billboard-bd > table')[0]
+for item in element.find_all('a'):
+        print(item.contents[0])
+
+```
 
 
 
