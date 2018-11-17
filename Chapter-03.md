@@ -368,6 +368,40 @@ if __name__ == '__main__':
         c = Consumer(i, q)
         c.start()
 ````
+进程池
+```
+from multiprocessing import Pool
+import time
+
+def func(num):
+    print("hello world %d" % num)
+    time.sleep(3)
+    
+
+if __name__ == '__main__':
+   
+    pool = Pool(processes=4)
+    
+    for i in range(100):
+        pool.apply_async(func, (i,))
+    pool.close()
+    pool.join()
+    
+
+```
+pool.map
+
+```
+from multiprocessing import Pool
+import time
+def f(x):
+    time.sleep(0.5)
+    return x*x
+
+if __name__ == '__main__':
+    with Pool(5) as p:
+        print(p.map(f, range(10)))
+```
 
 ##   协程
 协程，又成为微线程
