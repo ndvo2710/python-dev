@@ -450,6 +450,10 @@ for item in element.find_all('a'):
 
 ```
 
+### 作业
+
+抓取豆瓣电影 一周口碑榜，电影简介
+
 
 
 
