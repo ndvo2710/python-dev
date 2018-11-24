@@ -1,425 +1,535 @@
-# 第五天
+# 第五天 爬虫实战
+
+## 并发抓取
+将作业(抓取豆瓣电影 一周口碑榜，电影简介),改成并发模式，同时抓取多个网页
+
+```
+import requests
+from bs4 import BeautifulSoup
+from multiprocessing import Pool
+
 
-## myapp 视图概览
-在我们的应用程序中，我们将拥有以下四个视图
+def get_orders(url):
+    res = requests.get(url)
+    bs = BeautifulSoup(res.text, 'lxml')
+    h = bs.select('#billboard > div.billboard-hd > h2')[0]
+    t = h.contents[0]
+    orders = bs.select('#billboard > div.billboard-bd > table')[0]
+    urls = []
+    for order in orders.find_all('a'):
+        urls.append((order['href'],order.string))
+    return t, urls
+
+
+def get_contents(url):
+
+    res = requests.get(url)
+    bs = BeautifulSoup(res.text, 'lxml')
+    c = bs.select('#link-report')[0]
 
-+ index页面 - 显示最新的几个问题
-+ detail页面 - 显示问题，没有结果，但有选择的表单
-+ result页面 - 显示特定问题的结果
-+ vote 页面 - 对特定的问题的投票进行处理
+    return(c.text)
 
-在Django中，网页和其他内容由视图传递，每个视图都由一个简单的Python函数（或基于类的视图的方法）表示
-Django将通过检查请求的URL（准确地说，域名后的URL部分）来选择一个视图。
-在网络上，可能会遇到诸如此类的url“ME2/Sites/dirmod.asp?sid=&type=gen&mod=Core+Pages&gid=A6CD4967199A42D9B65B1B
-Django允许我们使用更优雅的方式
-URL，只是URL的一般形式 如/newsarchive/2018/06/.
 
-为了从URL获得视图，Django使用了'URLconf'（urls.py）。 
-URLconf将URL模式映射到视图
+if __name__ == '__main__':
+
+    url = 'https://movie.douban.com/'
+    t, urls = get_orders(url)
+    with Pool(5) as p:
+        contents =  p.map(get_contents, [url[0] for url in urls])
+    for content in contents:
+        print(content)
+```
+使用多进程的Pool.map  实现并发抓取
+
+这里有个问题我们的电影名称和介绍没有关联了，改进下
+
+```
+
+def get_contents(url):
+    url, name = url.split('|')
+    res = requests.get(url)
+    bs = BeautifulSoup(res.text, 'lxml')
+    c = bs.select('#link-report')[0]
+
+    return(name, c.text)
+
+if __name__ == '__main__':
+
+    url = 'https://movie.douban.com/'
+    t, urls = get_orders(url)
+    with Pool(5) as p:
+        contents =  p.map(get_contents, [url[0] + '|' + url[1]  for url in urls])
+    for content in contents:
+        print(content[0])
+        print(content[1])
+```
+
+## 保存抓取结果
+
+1. 保存为文本
+
+```
+if __name__ == '__main__':
+
+    url = 'https://movie.douban.com/'
+    t, urls = get_orders(url)
+    with Pool(5) as p:
+        contents =  p.map(get_contents, [url[0] + '|' + url[1]  for url in urls])
+    
+    with open(r'd:\r.txt', 'a') as f:
+        for content in contents:
+            f.write(content[0] + '\n' +content[1])
+```
+2. 保存为csv
+
+```
+if __name__ == '__main__':
+    import csv
+    url = 'https://movie.douban.com/'
+    t, urls = get_orders(url)
+    with Pool(5) as p:
+        contents =  p.map(get_contents, [url[0] + '|' + url[1]  for url in urls])
+    
+    with open(r'd:\r.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['名称', '介绍'])
+        for contents in contents:
+            writer.writerow(contents)
+```
+3. 写入数据库
 
-### 添加views
-现在让我们再添加一些视图到myapp/views.py。这些视图与我们第一index，略有不同
-它们有参数
+**准备工作**
 
-````
-from django.http import HttpResponse
-# Create your views here.
+安装mysqlclient
 
+pip install --only-binary :all: mysqlclient
 
-def index(request):
-    return HttpResponse("Hello, world, You're at myapp index")
+--only-binary 安装编译好的二进制
 
+启动mysql server
 
-def detail(request, question_id):
-    return HttpResponse("You're looking at question %s." % question_id)
+**建表**
 
+```
+import MySQLdb
+
+db = MySQLdb.connect(host='localhost',user="root",database="test")
+cursor = db.cursor()
+sql = '''create table if not exists moive(
+    id int auto_increment, 
+    name varchar(50), 
+    content varchar(250),
+    PRIMARY KEY (`id`))'''
+cursor.execute(sql)
+cursor.close()
+db.close()
+
+```
 
-def results(request, question_id):
-    response = "You're looking at the results of question %s."
-    return HttpResponse(response % question_id)
+**写入数据**
 
+```
+import requests
+from bs4 import BeautifulSoup
+from multiprocessing import Pool
+import MySQLdb
 
-def vote(request, question_id):
-    return HttpResponse("You're voting on question %s." % question_id)
-````
+def get_orders(url):
+    res = requests.get(url)
+    bs = BeautifulSoup(res.text, 'lxml')
+    h = bs.select('#billboard > div.billboard-hd > h2')[0]
+    t = h.contents[0]
+    orders = bs.select('#billboard > div.billboard-bd > table')[0]
+    urls = []
+    for order in orders.find_all('a'):
+        urls.append((order['href'],order.string))
+    return t, urls
+
+
+def get_contents(url):
+    url, name = url.split('|')
+    res = requests.get(url)
+    bs = BeautifulSoup(res.text, 'lxml')
+    c = bs.select('#link-report')[0]
+
+    return(name, c.text.strip())
+
 
-修改myapp/urls.py的path来调用这些views
-````
-from django.urls import path
+if __name__ == '__main__':
+    import csv
+    url = 'https://movie.douban.com/'
+    t, urls = get_orders(url)
 
-from .  import views
+    with Pool(5) as p:
+        contents =  p.map(get_contents, [url[0] + '|' + url[1]  for url in urls])
+    
+    db = MySQLdb.connect(host='localhost',user='root',database='test',charset='utf8')
+    cursor = db.cursor()
+    for content in contents:
+        sql = 'insert into moive(name, content) values("%s", "%s")' % (content[0], content[1])
+        print(sql)
+        cursor.execute(sql)
+        db.commit()
+    cursor.close()
+    db.close()
+```
+
+## scrapy 
+
+### 准备
+安装scrapy
+
+pip install 'd:\Twisted-18.9.0-cp36-cp36m-win_amd64.whl'
+pip install scrapy
+pip install pypiwin32
+
+
+### scrapy架构
+
+[文档](https://docs.scrapy.org/en/latest/topics/architecture.html)
+scrapy 是一个基于twisted的异步处理框架，是纯ptyhon实现的爬虫框架，模块间耦合度低，可扩展性强，可以灵活的完成格中需求
+
+Scrapy是用Twisted编写的，Twisted是一个流行的事件驱动的Python网络框架。因此，它使用非阻塞（也称为异步）代码实现并发。
+
+![img](./Chapter-05-code/pics/scrapy_architecture_02.png)
+
+上图显示了Scrapy体系结构及其组件的概述，以及系统内部发生的数据流的概述（由红色箭头显示）。
 
-
-urlpatterns = [
-    path('', views.index, name='index'),
-    # ex: /myapp/1/
-    path('<int:question_id>/', views.detail, name='detail'),
-    # ex: /myapp/5/results/
-    path('<int:question_id>/results/', views.results, name='results'),
-    # ex: /myapp/5/vote/
-    path('<int:question_id>/vote/', views.vote, name='vote'),
-]
-````
-在浏览器输入"http://127.0.0.1:8000/myapp/1/"，将运行detail（）方法并显示你在URL中提供的任何ID。
-尝试“http://127.0.0.1:8000/myapp/1/results/”和“http://127.0.0.1:8000/myapp/1/vote/” - 这些将显示结果和投票页面。
-当有人从你的网站请求一个页面 - 比如说“http://127.0.0.1:8000/myapp/1/”时，Django将加载mysite.urls 模块(setting中的ROOT_URLCONF配置的）
-它找到名为urlpatterns的变量并按顺序遍历这些模式,在'myapp/'找到匹配项后，它会去掉匹配的文本（“myapp/”），
-并将剩余的文本“1/”发送到“myapp.urls” 以供进一步处理,在那里匹配'<int：question_id>/'，调用detail（）视图，如下所示：
-````
-detail(request=<HttpRequest object>, question_id=1)
-````
-
-question_id=1部分来自<int：question_id>。使用尖括号“捕获”部分URL并将其作为关键字参数发送到视图函数。
-该字符串的：question_id>部分定义将用于标识匹配模式的名称,并且<int：部分是一个转换器，它决定了哪些模式应该匹配这部分URL路径。
-
-### 编写有用view
-
-每个视图负责执行以下两项操作之一：返回包含所请求页面内容的HttpResponse对象，或引发异常（如Http404）
-视图可以从数据库中读取记录，可以使用模板系统，可以生产html,json,xml,zip,pdf 等等
-以下是一个新的index（）视图，它显示了系统中最新的5个轮询问题，用逗号分隔：
-
-````
-from django.http import HttpResponse
-# Create your views here.
-
-from .models import Question
-
-
-def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    output = ', '.join([q.question_text for q in latest_question_list])
-    return HttpResponse(output)
-
-````
-
-但这里有一个问题：页面的设计在视图中是硬编码的。 如果你想改变页面的内容，你必须编辑这个Python代码
-因此，让我们使用Django的模板系统，将python代码和页面内容分离
-
-首先，在myapp目录中创建一个名为templates的目录。 Django将在那里寻找模板。
-mysite/settings.py中的TEMPLATES设置了Django如何加载和渲染模板。默认设置模板系统为DjangoTemplates， 且'APP_DIRS': True,
-按照惯例，DjangoTemplates在INSTALLED_APPS中查找“templates”子目录。
-在myapp/templates 目录中创建一个目录为myapp，在myapp/templates/myapp 中创建一个文件叫index.html
-
-````
-{% if latest_question_list %}
-    <ul>
-    {% for question in latest_question_list %}
-        <li><a href="/myapp/{{ question.id }}/">{{ question.question_text }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No polls are available.</p>
-{% endif %}
-
-````
-
-现在让我们更新我们的myapp/views.py中的索引视图以使用模板：
-
-````
-from django.http import HttpResponse
-# Create your views here.
-from django.template import loader
-from .models import Question
-
-
-def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    template = loader.get_template('myapp/index.html')
-    context = {
-        'latest_question_list': latest_question_list,
-    }
-    return HttpResponse(template.render(context, request))
-
-
-````
-
-该代码加载名为myapp/index.html的模板并将其传递给上下文，上下文是一个将模板变量名称映射到Python对象的字典
-
-快捷方式 render()
-````
-from django.http import HttpResponse
-# Create your views here.
-from django.shortcuts import render
-from .models import Question
-
-
-def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    context = {'latest_question_list': latest_question_list}
-    return render(request, 'myapp/index.html', context)
-
-````
-
-render() 函数将请求对象作为第一个参数，将模板名称作为第二个参数，将字典作为其可选的第三个参数。 
-它返回给定上下文呈现给定模板的HttpResponse对象。
-
-### 定义404 error
-
-编写detail页面
-````
-from django.http import HttpResponse
-# Create your views here.
-from django.http import Http404
-from django.shortcuts import render
-from .models import Question
-
-
-
-
-def detail(request, question_id):
-    try:
-        question = Question.objects.get(pk=question_id)
-    except Question.DoesNotExist:
-        raise Http404("Question does not exist")
-    return render(request, 'myapp/detail.html', {'question': question})
-
-
-
-````
-如果所请求的ID的问题不存在，该视图会引发Http404异常
-
-编写myapp/detail.html模板
-
-````
-{{ question }}
-````
-
-输入存在的id http://127.0.0.1:8000/myapp/1/
-输入不存在的id http://127.0.0.1:8000/myapp/100/
-
-快捷方式 get_object_or_404()
-````
-from django.http import HttpResponse
-# Create your views here.
-from django.shortcuts import render, get_object_or_404
-from .models import Question
-
-
-
-
-def detail(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'polls/detail.html', {'question': question})
-
-
-
-````
-
-get_object_or_404（）函数将Django model class作为其第一个参数和任意数量的关键字参数传递给模型管理器的get（）函数
-如果对象不存在，它会引发Http404。
-
-还有一个get_list_or_404（）函数，它的作用与get_object_or_404（）一样,
-除了使用filter（）而不是get（）。 如果列表为空，它会引发Http404。
-
-再次编辑detail模板
-````
-<h1>{{ question.question_text }}</h1>
-<ul>
-{% for choice in question.choice_set.all %}
-    <li>{{ choice.choice_text }}</li>
-{% endfor %}
-</ul>
-````
-
-模板系统使用 点查找 语法来访问变量属性,比如{{ question.question_text }} 
-方法调用发生在{％for％}循环中：question.choice_set.all被解释为Python代码question.choice_set.all()
-它返回Choice对象的迭代并适用于{％for％}标记。
-
-
-### 移除模板中的url硬编码
-
-回到myapp/index.html 模板
-
-包含如下url硬编码
-````
-<li><a href="/myapp/{{ question.id }}/">{{ question.question_text }}</a></li>
-````
-这种硬编码，紧密耦合的方法存在的问题是，在具有大量模板的项目上更改网址变得非常具有挑战性。
-但是，由于在myapp.urls模块的path()函数中定义了name参数，因此可以使用{％url％}模板标记删除对URL配置中定义的特定URL路径的依赖：
-
-````
-<li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
-````
-它的工作方式是查找myapp.urls模块中指定的URL定义,如果想改变url只需改变myapp.urls path的模式
-
-
-### 编写一个表单
-
-myapp/detail.html
-
-````
-<h1>{{ question.question_text }}</h1>
-
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-<form action="{% url 'vote' question.id %}" method="post">
-{% csrf_token %}
-{% for choice in question.choice_set.all %}
-    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
-{% endfor %}
-<input type="submit" value="Vote" />
-</form>
-````
-+ 上面的模板为每个问题选项显示一个单选按钮，每个单选按钮的值是关联的问题选项的ID，每个单选按钮的name是“choice”
-这意味着，当有人选择其中一个单选按钮并提交表单时，它会发送POST数据为所选选项的ID。这是HTML表单的基本概念
-
-+ 我们将表单的action设置为{％url'vote'question.id％} method为post，即使用post方法想该url提交数据
-
-+ forloop.counter表示for标签经过循环的次数
-
-+ 由于我们正在创建POST表单（可能会影响修改数据），因此我们需要担心跨站点请求伪造，Django带有一个非常易用的系统来防止它。
-简而言之，所有面向内部URL的POST表单都应使用{％csrf_token％}模板标记
-
-现在，让我们创建一个处理提交数据的Django视图，并对其进行处理。
-
-myapp/views.py:
-
-````
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
-
-from .models import Choice, Question
-# ...
-def vote(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    try:
-        selected_choice = question.choice_set.get(pk=request.POST['choice'])
-    except (KeyError, Choice.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(request, 'myapp/detail.html', {
-            'question': question,
-            'error_message': "You didn't select a choice.",
-        })
-    else:
-        selected_choice.votes += 1
-        selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
-        return HttpResponseRedirect(reverse('results', args=(question.id,)))
-````
-
-+ request.POST是一个类似字典的对象，允许你通过键名访问提交的数据。 
-在这种情况下，request.POST['choice']返回所选选项的ID。 
-请注意，Django还提供request.GET以相同的方式访问GET数据 
-但我们明确在代码中使用了request.POST，以确保数据仅通过POST调用进行更改。
-
-+ 如果在POST数据中未提供选项，request.POST['choice']将引发KeyError。 
-上面的代码检查KeyError并重新显示带有错误消息的问题表单，如果没有给出选择
-
-+ 增加选择计数后，代码返回HttpResponseRedirect而不是正常的HttpResponse。 
-HttpResponseRedirect接受一个参数,参数为用户将被重定向到的URL
-
-+ 在本例中，我们在HttpResponseRedirect构造函数中使用reverse()函数。此功能有助于避免在视图功能中硬编码URL
-它给出了我们想要传递控制权的视图的url模式的名称以及URL模式的可变部分
-
-接下来编写result视图
-
-````
-def results(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'myapp/results.html', {'question': question})
-````
-
-编写myapp/results.html模板
-````
-<h1>{{ question.question_text }}</h1>
-
-<ul>
-{% for choice in question.choice_set.all %}
-    <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
-{% endfor %}
-</ul>
-
-<a href="{% url 'detail' question.id %}">Vote again?</a>
-````
-
-
-### 通用视图
-detail(),results(),index()这些视图代表了基本Web开发的常见案例，
-根据URL中传递的参数从数据库获取数据，加载模板并返回呈现的模板。
-由于这很常见，Django提供了一个称为“通用视图”的功能
-
-我们将我们的投票应用程序转换为使用通用视图系统，以便我们可以删除一大堆我们自己的代码。 
-我们只需采取几个步骤即可完成转换。
-
-+ 修改URLconf
-+ 删除一些旧的不需要的视图
-+ 基于Django通用视图引入新的视图
-
-修改URLconf
-````
-from django.urls import path
-
-from . import views
-
-
-urlpatterns = [
-    path('', views.IndexView.as_view(), name='index'),
-    path('<int:pk>/', views.DetailView.as_view(), name='detail'),
-    path('<int:pk>/results/', views.ResultsView.as_view(), name='results'),
-    path('<int:question_id>/vote/', views.vote, name='vote'),
-]
-````
-
-修改view
-
-````
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
-from django.views import generic
-
-from .models import Choice, Question
-
-
-class IndexView(generic.ListView):
-    template_name = 'myapp/index.html'
-    context_object_name = 'latest_question_list'
-
-    def get_queryset(self):
-        """Return the last five published questions."""
-        return Question.objects.order_by('-pub_date')[:5]
-
-
-class DetailView(generic.DetailView):
-    model = Question
-    template_name = 'myapp/detail.html'
-
-
-class ResultsView(generic.DetailView):
-    model = Question
-    template_name = 'myapp/results.html'
-
-
-def vote(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    try:
-        selected_choice = question.choice_set.get(pk=request.POST['choice'])
-    except (KeyError, Choice.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(request, 'myap/detail.html', {
-            'question': question,
-            'error_message': "You didn't select a choice.",
-        })
-    else:
-        selected_choice.votes += 1
-        selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
-        return HttpResponseRedirect(reverse('results', args=(question.id,)))
-````
-
-我们在这里使用两个通用视图：ListView和DetailView。 这两个视图分别抽象出“显示对象列表”和“显示特定类型对象的详细页面”的概念
-+ 每个通用视图都需要知道它将采取何种model。 这是使用model属性提供的
-+ DetailView通用视图期望从URL捕获的主键值被称为“pk”，所以我们已经改变了通用视图的question_id为pk。
-
-
-默认情况下，DetailView通用视图使用名为<app name>/<model name> _detail.html的模板。 
-在我们的例子中，它会使用模板“myapp/question_detail.html”.template_name属性用于告诉Django使用特定的模板名称而不是自动生成的默认模板名称。
-在前面的例子，模板已经提供了一个包含question和latest_question_list上下文变量的上下文。
-对于DetailView，问题变量是自动提供的 - 由于我们使用Django 的model（Question），Django能够为上下文变量确定合适的名称
-但是，对于ListView，自动生成的上下文变量是question_list。为了覆盖这个，我们提供context_object_name属性，指定我们想用latest_question_list来代替。
+它可以分为如下几个部分：
+* Engine 引擎负责控制系统所有组件之间的数据流，并在发生某些操作时触发事件
+* Scheduler 调度程序接收来自引擎的请求，并在引擎请求它们时将它们排入队列
+* Downloader 负责获取网页并将其提供给引擎，引擎又将它们提供给Spider
+* Spider 蜘蛛是由Scrapy用户编写的自定义类，用于解析响应并从中提取items
+* Item Pipeline 负责在Item被Spider提取后处理Item。典型的包括清理，验证和持久性（如将项目存储在数据库中）
+* Downloader middlewares 是位于Engine和Downloader之间的特定钩子，当它们从Engine传递到Downloader时处理请求，以及从Downloader传递到Engine的响应。
+* Spider middlewares 是位于Engine和Spider之间的特定钩子，能够处理Spider输入（响应）和输出（Item和请求）。
+
+### 数据流
+Scrapy中的数据流由执行Engine控制
+1. Engine从Spider获取爬行的初始请求
+2. Engine在Scheduler中调度请求并请求下一个要爬取的请求
+3. Scheduler将下一个请求返回给Engine
+4. Engine将请求发送到Donlaoder
+5. 页面完成下载后，Downlaoder会生成一个响应并将其发送到Engine
+6. Engine从Downloader接收响应并将其发送到Spider进行处理
+7. Spider处理响应并将抓取到的Item和新的请求返回到Engine
+8. Engine将已抓取的Item发送到Item Pipe，并将新的请求发送给scheduler
+9. 重复1-8，只到没有可抓取的请求
+
+### 第一个项目
+
+通过一个项目，完成一边scrapy。通过这个过程，可以对scrapy的基本用法和原理有个答题的了解
+
+* 创建一个Scrapy项目
+* 写一个spider去爬取站点和提取数据
+* 使用命令行导出已抓取的数据
+* 跟随链接
+
+
+1. 创建一个项目
+```
+scrapy startproject tutorial
+```
+项目结构
+
+```
+tutorial/
+├── scrapy.cfg            # 部署时的配置文件
+└── tutorial              # 项目模块目录  
+    ├── __init__.py
+    ├── __pycache__
+    ├── items.py          # 项目Item 定义
+    ├── middlewares.py    # midlewares 文件
+    ├── pipelines.py      # pipline 文件
+    ├── settings.py       # 项目配置文件
+    └── spiders           # 放置Spider的目录
+        ├── __init__.py
+        └── __pycache__
+
+```
+
+2. 第一个Spider
+
+Spider 是一个Class Scrapy用来从网站抓取信息，它必须是scarpy.Spider的子类，并且包含一个初始请求。递归抓取和提取数据是可选的
+
+在tutorial/spiders目录下新建文件quotes_spider.py
+
+```
+import scrapy
+
+
+class QuotesSpider(scrapy.Spider):
+    name = "quotes"
+
+    def start_requests(self):
+        urls = [
+            'http://quotes.toscrape.com/page/1/',
+            'http://quotes.toscrape.com/page/2/',
+        ]
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
+
+    def parse(self, response):
+        page = response.url.split("/")[-2]
+        filename = 'quotes-%s.html' % page
+        with open(filename, 'wb') as f:
+            f.write(response.body)
+        self.log('Saved file %s' % filename)
+```
+我们定义了个类继承scrapy.Spider
+name 定义了spider的名字在整个项目中必须是唯一的
+start_requests 必须返回一个可迭代的请求（可以返回请求列表或编写生成器函数），Spider将开始爬行。后续请求将从这些初始请求中连续生成。
+parse  对请求的响应结果进行处理。通常会解析响应，将抽取的数据作为dicts提取，并查找要跟踪的新URL并从中创建新请求（Request）
+
+运行spider
+
+`scrapy crawl quotes`
+在当前目录下生产两个html文件
+Scrapy Scheduler 调度由Spider的start_requests方法返回的scrapy.Request对象,收到请求后，实例化Reponse对象并调用callback方法(self.parse()),井Reponse做为参数传递
+
+3. 提取数据
+
+学习如何使用Scrapy提取数据的最佳方法是使用shell 
+
+`scrapy shell 'http://quotes.toscrape.com/page/1/'`
+
+你会看到以下内容
+```
+2018-11-24 20:30:56 [scrapy.core.engine] DEBUG: Crawled (200) <GET http://quotes.toscrape.com/page/1/> (referer: None)
+[s] Available Scrapy objects:
+[s]   scrapy     scrapy module (contains scrapy.Request, scrapy.Selector, etc)
+[s]   crawler    <scrapy.crawler.Crawler object at 0x000001D4F03E8EB8>
+[s]   item       {}
+[s]   request    <GET http://quotes.toscrape.com/page/1/>
+[s]   response   <200 http://quotes.toscrape.com/page/1/>
+[s]   settings   <scrapy.settings.Settings object at 0x000001D4F2B09898>
+[s]   spider     <DefaultSpider 'default' at 0x1d4f2dab6a0>
+[s] Useful shortcuts:
+[s]   fetch(url[, redirect=True]) Fetch URL and update local objects (by default, redirects are followed)
+[s]   fetch(req)                  Fetch a scrapy.Request and update local objects
+[s]   shelp()           Shell help (print this help)
+[s]   view(response)    View response in a browser
+```
+
+使用css选择器
+```
+>>> response.css('title')
+[<Selector xpath='descendant-or-self::title' data='<title>Quotes to Scrape</title>'>]
+```
+返回一个Selector对象的列表
+
+提取数据
+```
+ response.css('title::text').extract()
+```
+注意我们在css查询中添加了`::text`,意思提取title元素中的文本
+如果不添加
+```
+>>> response.css('title').extract()
+['<title>Quotes to Scrape</title>']
+```
+
+注意结果是个列表如果我们想提取提一个
+```
+>>> response.css('title::text').extract_first()
+'Quotes to Scrape'
+
+>>> response.css('title::text')[0].extract()
+'Quotes to Scrape'
+```
+
+还可以使用xpath
+```
+>>> response.xpath('//title')
+[<Selector xpath='//title' data='<title>Quotes to Scrape</title>'>]
+>>> response.xpath('//title/text()').extract_first()
+'Quotes to Scrape'
+```
+
+提取名言与作者
+
+```
+scrapy shell 'http://quotes.toscrape.com'
+
+>>> quote = response.css("div.quote")[0]
+>>> title = quote.css("span.text::text").extract_first()
+>>> title
+'“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”'
+>>> author = quote.css("small.author::text").extract_first()
+>>> author
+'Albert Einstein'
+
+>>> tags = quote.css("div.tags a.tag::text").extract()
+>>> tags
+['change', 'deep-thoughts', 'thinking', 'world']
+```
+
+改写我们的spider
+```
+import scrapy
+
+
+class QuotesSpider(scrapy.Spider):
+    name = "quotes"
+    start_urls = [
+        'http://quotes.toscrape.com/page/1/',
+        'http://quotes.toscrape.com/page/2/',
+    ]
+
+    def parse(self, response):
+        for quote in response.css('div.quote'):
+            yield {
+                'text': quote.css('span.text::text').extract_first(),
+                'author': quote.css('small.author::text').extract_first(),
+                'tags': quote.css('div.tags a.tag::text').extract(),
+            }
+```
+注意 start_urls 是start_requests方法的快捷方式
+
+运行spider
+```
+scrapy crawl quotes
+
+
+{'text': '“I like nonsense, it wakes up the brain cells. Fantasy is a necessary ingredient in living.”', 'author': 'Dr. Seuss
+', 'tags': ['fantasy']}
+2018-11-24 21:05:00 [scrapy.core.scraper] DEBUG: Scraped from <200 http://quotes.toscrape.com/page/2/>
+{'text': '“I may not have gone where I intended to go, but I think I have ended up where I needed to be.”', 'author': 'Dougla
+s Adams', 'tags': ['life', 'navigation']}
+```
+4. 保存抓取的数据
+
+```
+scrapy crawl quotes -o quotes.json
+
+```
+
+在当前目录下生产quotes.json文件
+
+4. 跟随链接
+
+选择下一页
+```
+scrapy shell 'http://quotes.toscrape.com'
+response.css('li.next a::attr(href)').extract_first()
+'/page/2/'
+```
+
+修改spider
+```
+import scrapy
+
+
+class QuotesSpider(scrapy.Spider):
+    name = "quotes"
+    start_urls = [
+        'http://quotes.toscrape.com/page/1/',
+    ]
+
+    def parse(self, response):
+        for quote in response.css('div.quote'):
+            yield {
+                'text': quote.css('span.text::text').extract_first(),
+                'author': quote.css('span small::text').extract_first(),
+                'tags': quote.css('div.tags a.tag::text').extract(),
+            }
+
+        next_page = response.css('li.next a::attr(href)').extract_first()
+        if next_page is not None:
+            yield response.follow(next_page, callback=self.parse)
+```
+
+5. 存入数据库
+
+使用item
+定义item 类
+修改tutorial/items.py
+```
+class TutorialItem(scrapy.Item):
+    # define the fields for your item here like:
+    # name = scrapy.Field()
+    text = scrapy.Field()
+    author = scrapy.Field()
+    tags = scrapy.Field()
+```
+
+修改spider 使用item 类
+ ```
+ import scrapy
+from tutorial.items import TutorialItem
+
+
+class QuotesSpider(scrapy.Spider):
+    name = "quotes"
+    start_urls = [
+        'http://quotes.toscrape.com/page/1/',
+    ]
+
+    def parse(self, response):
+        for quote in response.css('div.quote'):
+            item = TutorialItem()
+            item['text'] = quote.css('span.text::text').extract_first()
+            item['author'] = quote.css('span small::text').extract_first()
+            item['tags'] = quote.css('div.tags a.tag::text').extract()
+            yield item
+
+        next_page = response.css('li.next a::attr(href)').extract_first()
+        if next_page is not None:
+            yield response.follow(next_page, callback=self.parse)
+ ```
+
+ 使用piplinies
+
+修改tutorial/piplines.py
+ ```
+ # -*- coding: utf-8 -*-
+
+# Define your item pipelines here
+#
+# Don't forget to add your pipeline to the ITEM_PIPELINES setting
+# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+from scrapy.conf import settings
+import MySQLdb
+
+class TutorialPipeline(object):
+    def __init__(self, host, database, user):
+        self.host = host
+        self.database = database
+        self.user = user
+    @classmethod
+    def from_crawler(cls, crawler):
+        settings = crawler.settings
+        return cls(
+            settings.get('MYSQL_HOST'),
+            settings.get('MYSQL_DATABASE'), 
+            settings.get('MYSQL_USER')
+            )
+    def open_spider(self, spider):
+        self.db = MySQLdb.connect(host=self.host,database=self.database,user=self.user, charset='utf8')
+        self.cursor = self.db.cursor()
+    def close_spider(self, spider):
+        self.cursor.close()
+        self.db.close()
+    def process_item(self, item, spider):
+        data = dict(item)
+        sql = 'insert into qutoes(text, author, tags) values("%s", "%s", "%s")' % (data['text'],data['author'],data['tags'])
+        self.cursor.execute(sql)
+        self.db.commit()
+        return item
+
+ ```
+
+ 修改settings.py
+ 取消 ITEM_PIPELINES 注释
+ ```
+ ITEM_PIPELINES = {
+    'tutorial.pipelines.TutorialPipeline': 300,
+}
+ ```
+
+ 添加数据库配置
+ ```
+ MYSQL_HOST='localhost'
+MYSQL_DATABASE='test'
+MYSQL_USER='root'
+ ```
