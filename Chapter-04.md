@@ -446,7 +446,8 @@ soup = BeautifulSoup(html_doc, 'html.parser')
 
 element = soup.select('#billboard > div.billboard-bd > table')[0]
 for item in element.find_all('a'):
-        print(item.contents[0])
+    print(item.text)
+
 
 ```
 
