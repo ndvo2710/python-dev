@@ -1,0 +1,1400 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" ng-app="app" ng-controller="AppCtrl" class="ng-scope"><head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>
+        <title ng-bind="title" class="ng-binding">火车票查询</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="renderer" content="webkit" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+
+        <script src="library/des3.js?v=@@version"></script>  
+        <script src="library/explorer.js?v=@@version"></script>
+
+        <!-- <link rel="stylesheet" href="./css/layout.css?v=@@version" /> -->
+        <!-- <link rel="stylesheet" href="./css/index.css?v=@@version" /> -->
+        <!-- <script src='src/lib.js?v=@@version'></script> -->
+        <!-- <script src='src/index/index.js?v=@@version'></script> -->
+
+    <link href="css/styles.b2c33f.css" rel="stylesheet" /><script type="text/javascript" charset="utf-8" async="" src="chunks/layout-ctl.chunk.dddde060308573b1ed68.js"></script><script type="text/javascript" charset="utf-8" async="" src="chunks/train-search-ctl.chunk.e5255c1ab56bbc9de626.js"></script><script type="text/javascript" charset="utf-8" async="" src="chunks/layout-tpl.chunk.cbae70809fabb5695000.js"></script><script type="text/javascript" charset="utf-8" async="" src="chunks/train-layout-tpl.chunk.6f6aded15139564c205e.js"></script><script type="text/javascript" charset="utf-8" async="" src="chunks/train-search-tpl.chunk.e7df4ec3780e19a3110d.js"></script></head>
+    <body ng-class="{'popup-open': ui.config.loading || ui.config.templateUrl}" class="">
+        <!-- uiView: --><section ui-view="" class="ng-scope"><div class="header ng-scope" ng-class="{'index':index}">
+	<div class="container">
+		<div class="logo">
+			<a ui-sref="home" class="icons icon-logo" href="#/"></a>
+		</div>
+
+		<nav>
+			<div class="nav-body">
+				<div class="nav-menus">
+					<ul>
+						<li>
+							<a ui-sref="home" class="nav-item" ng-class="{'on': $state.current.name==='home'}" href="#/">网约车</a>
+						</li>                        
+						<li>
+                            <a ui-sref="train.index" ng-class="{'on' : $state.includes('train')}" class="nav-item on" href="#/train/index">火车票</a>
+                        </li>
+						<li>
+							<a ui-sref="bus.index" ng-class="{'on' : $state.includes('bus')}" class="nav-item" href="#/bus/index">汽车票</a>
+						</li>
+						
+					</ul>
+				</div>
+			</div>
+		</nav>
+
+		<div class="login-box">
+			<div class="qrcode">
+				<div class="wechat-btn">
+					<a class="icons icon-wechat" ng-mouseenter="hwechat = !hwechat" ng-mouseleave="hwechat = !hwechat"></a>
+					<div class="wechat-qrcode ng-hide" ng-show="hwechat">
+						<div class="arrtop icon-arrtop"></div>
+						<img src="./images/wechat-qrcode.jpg" alt="点点出行微信公众号" />
+						<p>点点出行微信公众号</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="inner-login-box">
+				<!-- ngIf: !isLogin --><div class="btn-box ng-scope" ng-if="!isLogin">
+					<a ui-sref="login" class="head-login" href="#/login">登录</a>
+					<span class="separate">|</span>
+					<a ui-sref="register" class="head-regiest" href="#/register">注册</a>
+				</div><!-- end ngIf: !isLogin -->
+				<!-- ngIf: isLogin -->
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<!-- uiView: --><div class="wrap ng-scope" ui-view=""><!-- uiView: --><div ui-view="" class="ng-scope"><div class="container ng-scope">
+    <div class="train-search-result-form clear-fixed">
+        <form name="planeSearchForm" novalidate="novalidate" autocomplete="off" class="ng-pristine ng-valid ng-valid-required">
+            <div class="train-search-content">
+                <div class="form-group clear-fixed">
+                    <!-- form city input -->
+                    <div class="input-item">
+                        <span class="input-indicate">出发</span>
+                        <input type="text" class="form-input-location ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-required" ng-model="trainSearch.fromCityName" placeholder="出发城市" ng-change="fromCityChange()" ng-click="fromCity()" required="" />
+                        <span class="input-icon">
+                            
+                            <i class="icons icon-location"></i>
+                            
+                        </span>
+                        <city hotcitys="hotcity" citys="citys" ng-show="isStartcity" tw-click-outside="fromCityHide()" class="ng-hide"><div class="city-pop" id="city">
+    <div class="city-pop-inner">
+        <div class="city-pop-header">
+            <h2>支持中文/拼音输入</h2>
+        </div>
+        <div class="city-pop-body">
+            <div class="city-inner-body">
+                <div class="city-inner-body-top">
+                    <ul class="city-sort">
+                        <!-- ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='热门城市'}" ng-click="tab(azdata)" class="ng-binding ng-scope active">
+                            热门城市
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='A'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            A
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='B'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            B
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='C'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            C
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='D'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            D
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='E'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            E
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='F'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            F
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='G'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            G
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='H'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            H
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='I'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            I
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='J'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            J
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='K'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            K
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='L'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            L
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='M'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            M
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='N'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            N
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='O'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            O
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='P'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            P
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='Q'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            Q
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='R'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            R
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='S'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            S
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='T'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            T
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='U'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            U
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='V'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            V
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='W'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            W
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='X'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            X
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='Y'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            Y
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='Z'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            Z
+                        </li><!-- end ngRepeat: azdata in az track by $index -->
+                    </ul>
+                </div>
+
+                <div class="city-inner-body-bottom">
+                    <div class="letter-item" ng-show="azCode==='热门城市'">
+                        <ul>
+                            <!-- ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                北京
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                上海
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                广州
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                深圳
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                成都
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                杭州
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                武汉
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                西安
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                重庆
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                青岛
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                长沙
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                南京
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='A'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityA track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='B'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityB track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='C'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityC track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='D'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityD track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='E'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityE track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='F'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityF track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='G'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityG track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='H'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityH track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='I'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityI track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='J'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityJ track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='K'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityK track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='L'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityL track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='M'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityM track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='N'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityN track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='O'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityO track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='P'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityP track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='Q'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityQ track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='R'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityR track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='S'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityS track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='T'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityT track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='U'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityU track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='V'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityV track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='W'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityW track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='X'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityX track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='Y'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityY track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='Z'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityZ track by $index -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</city>
+                         <div class="city-query ng-hide" tw-click-outside="fromCityQueryHide()" ng-show="isStartcityChange &amp;&amp; trainSearch.fromCityName ">
+                            <div class="inner-city-query">
+                                <ul>
+                                    <!-- ngRepeat: city in citys | filter: trainSearch.fromCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.fromCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        深圳北
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.fromCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.fromCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        深圳
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.fromCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.fromCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        深圳东
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.fromCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.fromCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        深圳西
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.fromCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.fromCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        深圳坪山
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.fromCityName track by $index -->
+                                    <li ng-show="notFindCity" class="ng-hide">
+                                        抱歉，没有搜索到结果
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <span ng-class="{'active': switchCityBtn}" class="switch-citys" ng-click="changeTrainFromTo()">
+                       <span> </span>
+                       <i class="icons icon-switch"></i>
+                       <span> </span>
+                    </span>
+                    <!-- to city input -->
+                    <div class="input-item">
+                        <span class="input-indicate">到达</span>
+                        <input type="text" class="form-input-location ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-required" placeholder="目的城市" ng-model="trainSearch.toCityName" ng-change="toCityChange()" ng-click="toCity()" required="" />
+                        <span class="input-icon">
+                            <i class="icons icon-location"></i>
+                        </span>
+                        <city hotcitys="hotcity" citys="endCitys" ng-show="isEndcity" tw-click-outside="toCityHide()" class="ng-hide"><div class="city-pop" id="city">
+    <div class="city-pop-inner">
+        <div class="city-pop-header">
+            <h2>支持中文/拼音输入</h2>
+        </div>
+        <div class="city-pop-body">
+            <div class="city-inner-body">
+                <div class="city-inner-body-top">
+                    <ul class="city-sort">
+                        <!-- ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='热门城市'}" ng-click="tab(azdata)" class="ng-binding ng-scope active">
+                            热门城市
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='A'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            A
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='B'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            B
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='C'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            C
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='D'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            D
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='E'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            E
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='F'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            F
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='G'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            G
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='H'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            H
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='I'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            I
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='J'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            J
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='K'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            K
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='L'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            L
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='M'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            M
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='N'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            N
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='O'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            O
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='P'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            P
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='Q'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            Q
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='R'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            R
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='S'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            S
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='T'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            T
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='U'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            U
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='V'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            V
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='W'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            W
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='X'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            X
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='Y'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            Y
+                        </li><!-- end ngRepeat: azdata in az track by $index --><li ng-repeat="azdata in az track by $index" ng-class="{'active': azCode==='Z'}" ng-click="tab(azdata)" class="ng-binding ng-scope">
+                            Z
+                        </li><!-- end ngRepeat: azdata in az track by $index -->
+                    </ul>
+                </div>
+
+                <div class="city-inner-body-bottom">
+                    <div class="letter-item" ng-show="azCode==='热门城市'">
+                        <ul>
+                            <!-- ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                北京
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                上海
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                广州
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                深圳
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                成都
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                杭州
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                武汉
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                西安
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                重庆
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                青岛
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                长沙
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index --><li ng-repeat="hotcity in hotcitys track by $index" ng-click="checkHotCity(hotcity.cityName,hotcity.cityCode)" class="ng-binding ng-scope">
+                                南京
+                            </li><!-- end ngRepeat: hotcity in hotcitys track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='A'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityA track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='B'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityB track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='C'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityC track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='D'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityD track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='E'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityE track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='F'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityF track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='G'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityG track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='H'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityH track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='I'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityI track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='J'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityJ track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='K'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityK track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='L'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityL track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='M'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityM track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='N'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityN track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='O'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityO track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='P'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityP track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='Q'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityQ track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='R'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityR track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='S'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityS track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='T'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityT track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='U'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityU track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='V'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityV track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='W'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityW track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='X'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityX track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='Y'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityY track by $index -->
+                        </ul>
+                    </div>
+
+                    <div class="letter-item ng-hide" ng-show="azCode==='Z'">
+                        <ul>
+                            <!-- ngRepeat: city in oCityZ track by $index -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</city>
+                        <div class="city-query ng-hide" tw-click-outside="toCityQueryHide()" ng-show="isEndcityChange &amp;&amp; trainSearch.toCityName" ignore-if="startCityQueryHidden()">
+                            <div class="inner-city-query">
+                                <ul>
+                                    <!-- ngRepeat: city in citys | filter: trainSearch.toCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.toCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        石家庄
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.toCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.toCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        石家庄北
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.toCityName track by $index --><li ng-repeat="city in citys | filter: trainSearch.toCityName track by $index" ng-click="cityChangeCheck(city.cityName,city.cityCode,city)" class="ng-binding ng-scope">
+                                        石家庄东
+                                    </li><!-- end ngRepeat: city in citys | filter: trainSearch.toCityName track by $index -->
+                                    <li ng-show="notFindCity" class="ng-binding ng-hide">没有找到石家庄</li>
+                                </ul>
+                            </div>
+                        </div> 
+                    </div>
+                    <!--start date-->
+                     <div class="input-item input-item-date">
+                        <span class="input-indicate">日期</span>
+                        <input type="text" class="form-input-date ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-required" placeholder="出发日期" id="trainStartTime" ng-model="trainSearch.detpStartDate" required="" data-rome-id="0" />
+                        <span class="input-icon">
+                            <!-- <b>{{trainSearch.fromWeek}}</b> -->
+                            <i class="icons icon-time"></i>
+                        </span>
+                    </div>
+                    <!--findGD checkbox -->
+                 <!--    <div class="input-item input-check">
+                        <input 
+                            type="checkbox"  
+                            ng-model="trainSearch.highSpeedFlag"
+                            ng-true-value="true"
+                            ng-false-value="false"
+                        />
+                        <label>只查高铁/动车</label>
+                    </div> --> 
+                </div>
+            </div>
+            <a ng-click="submitBusSearch()" class="search-submit">
+                搜索
+            </a>
+        </form>
+    </div>
+
+
+    <div class="train-search-result clear-fixed">
+        <!--列表-->
+        <div class="train-ticket-list-container ">
+             <trainticket-lists dates="dateLists" class="ng-isolate-scope"><train-datelists><div class="train-result-date">
+    <div class="prev-date" ng-click="prevDate()"><i class="icons icon-left-trigon"></i></div>
+    <div class="datelists">
+	    <ul style="width: 3518.5px; left: 0px;">
+	        <!-- ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope active">
+                <span class="ng-binding">12-01</span><br />
+                <span class="ng-binding">今天</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-02</span><br />
+                <span class="ng-binding">周日</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-03</span><br />
+                <span class="ng-binding">周一</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-04</span><br />
+                <span class="ng-binding">周二</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-05</span><br />
+                <span class="ng-binding">周三</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-06</span><br />
+                <span class="ng-binding">周四</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-07</span><br />
+                <span class="ng-binding">周五</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-08</span><br />
+                <span class="ng-binding">周六</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-09</span><br />
+                <span class="ng-binding">周日</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-10</span><br />
+                <span class="ng-binding">周一</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-11</span><br />
+                <span class="ng-binding">周二</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-12</span><br />
+                <span class="ng-binding">周三</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-13</span><br />
+                <span class="ng-binding">周四</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-14</span><br />
+                <span class="ng-binding">周五</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-15</span><br />
+                <span class="ng-binding">周六</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-16</span><br />
+                <span class="ng-binding">周日</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-17</span><br />
+                <span class="ng-binding">周一</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-18</span><br />
+                <span class="ng-binding">周二</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-19</span><br />
+                <span class="ng-binding">周三</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-20</span><br />
+                <span class="ng-binding">周四</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-21</span><br />
+                <span class="ng-binding">周五</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-22</span><br />
+                <span class="ng-binding">周六</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-23</span><br />
+                <span class="ng-binding">周日</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-24</span><br />
+                <span class="ng-binding">周一</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-25</span><br />
+                <span class="ng-binding">周二</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-26</span><br />
+                <span class="ng-binding">周三</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-27</span><br />
+                <span class="ng-binding">周四</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-28</span><br />
+                <span class="ng-binding">周五</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-29</span><br />
+                <span class="ng-binding">周六</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-30</span><br />
+                <span class="ng-binding">周日</span>
+	        </li><!-- end ngRepeat: item in dates --><li ng-class="{'active':item.date === isActiveDate}" ng-repeat="item in dates" ng-click="changeFromTime(item)" class="ng-scope">
+                <span class="ng-binding">12-31</span><br />
+                <span class="ng-binding">周一</span>
+	        </li><!-- end ngRepeat: item in dates -->
+	    </ul>
+    </div>
+    <div class="next-date" ng-click="nextDate()"><i class="icons icon-right-trigon"></i></div>
+</div>
+
+
+
+
+
+
+</train-datelists>
+
+<div class="filght-list">
+	<div class="flight-fliter train-fliter clear-fixed">
+		<!--start time-->
+		<div class="flight-item clear-fixed">
+			<div class="title clear-fixed pointer">
+				<span>出发时段:</span>
+				<span class="checkbox title-checkbox-select active" ng-class="{'active':filterCondition.deptStartTime[0]}">
+					<input type="checkbox" id="strat-date" ng-model="filterCondition.deptStartTime[0]" ng-true-value="true" ng-false-value="false" ng-change="detpStartTimeChange(0)" class="ng-pristine ng-untouched ng-valid ng-not-empty" />
+					<label for="strat-date" class="icons fillorder-check"></label>
+					<span class="text">不限</span>
+				</span>
+			</div>
+			<div class="fliter-list">
+				<span class="checkbox-select" ng-class="{'active':filterCondition.deptStartTime[1]}">
+					<input type="checkbox" id="strat-date-1" ng-model="filterCondition.deptStartTime[1]" ng-true-value="'00:00-06:00'" ng-false-value="false" ng-change="detpStartTimeChange(1)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="strat-date-1" class="icons fillorder-check"></label>
+					00:00-06:00
+				</span>
+				<span class="checkbox-select" ng-class="{'active':filterCondition.deptStartTime[2]}">
+					<input type="checkbox" id="strat-date-2" ng-model="filterCondition.deptStartTime[2]" ng-true-value="'06:00-12:00'" ng-false-value="false" ng-change="detpStartTimeChange(2)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="strat-date-2" class="icons fillorder-check"></label>	
+					06:00-12:00
+				</span>
+				<span class="checkbox-select" ng-class="{'active':filterCondition.deptStartTime[3]}">
+					<input type="checkbox" id="strat-date-3" ng-model="filterCondition.deptStartTime[3]" ng-true-value="'12:00-18:00'" ng-false-value="false" ng-change="detpStartTimeChange(3)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="strat-date-3" class="icons fillorder-check"></label>	
+					12:00-18:00
+				</span>
+				<span class="checkbox-select" ng-class="{'active':filterCondition.deptStartTime[4]}">
+					<input type="checkbox" id="strat-date-4" ng-model="filterCondition.deptStartTime[4]" ng-true-value="'18:00-24:00'" ng-false-value="false" ng-change="detpStartTimeChange(4)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="strat-date-4" class="icons fillorder-check"></label>	
+					18:00-24:00
+				</span>
+			</div>
+		</div>
+		<!--from station-->
+		<div class="flight-item clear-fixed">
+			<div class="title">
+				<span>出发车站:</span>
+				<span class="checkbox title-checkbox-select active" ng-class="{'active':filterCondition.deptStation[0]}">
+					<input type="checkbox" id="strat-station" ng-model="filterCondition.deptStation[0]" ng-true-value="true" ng-false-value="false" ng-change="detpStationChange(0)" class="ng-pristine ng-untouched ng-valid ng-not-empty" />
+					<label for="strat-station" class="icons fillorder-check"></label>
+					<span class="text">不限</span>
+				</span>
+			</div>
+			<div class="fliter-list">
+				<!-- ngRepeat: item in trainInfos.trainDeptStations track by $index --><span ng-repeat="item in trainInfos.trainDeptStations track by $index" class="checkbox-select ng-binding ng-scope" ng-class="{'active':filterCondition.deptStation[$index+1]}">
+					<input type="checkbox" id="strat-station-1" ng-model="filterCondition.deptStation[$index+1]" ng-true-value="'深圳北'" ng-false-value="false" ng-change="detpStationChange($index+1)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="strat-station-1" class="icons fillorder-check"></label>	
+					深圳北
+				</span><!-- end ngRepeat: item in trainInfos.trainDeptStations track by $index -->
+			</div>
+			<div class="more-choice" ng-click="moreChoice = true" ng-show="!moreChoice"> 
+				更多筛选
+				<i class="icons train-seach-down"></i>
+			</div>
+		</div>
+		<!--to station-->
+		<div class="flight-item clear-fixed ng-hide" ng-show="moreChoice">
+			<div class="title clear-fixed pointer">
+				<span>到达车站:</span>
+				<span class="checkbox title-checkbox-select active" ng-class="{'active':filterCondition.arrStation[0]}">
+					<input type="checkbox" id="end-station" ng-model="filterCondition.arrStation[0]" ng-true-value="true" ng-false-value="false" ng-change="arrStationChange(0)" class="ng-pristine ng-untouched ng-valid ng-not-empty" />
+					<label for="end-station" class="icons fillorder-check"></label>
+					<span class="text">不限</span>
+				</span>
+			</div>
+			<div class="fliter-list"> 
+				<!-- ngRepeat: item in trainInfos.trainArrStations track by $index --><span ng-repeat="item in trainInfos.trainArrStations track by $index" class="checkbox-select ng-binding ng-scope" ng-class="{'active':filterCondition.arrStation[$index+1]}">
+					<input type="checkbox" id="end-station-1" ng-model="filterCondition.arrStation[$index+1]" ng-true-value="'石家庄'" ng-false-value="false" ng-change="arrStationChange($index+1)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="end-station-1" class="icons fillorder-check"></label>
+					石家庄
+				</span><!-- end ngRepeat: item in trainInfos.trainArrStations track by $index -->
+			</div>
+		</div>
+		<!--train  model-->
+		<div class="flight-item clear-fixed ng-hide" ng-show="moreChoice">
+			<div class="title clear-fixed pointer">
+				<span>车型:</span>
+				<span class="checkbox title-checkbox-select active" ng-class="{'active':filterCondition.trainType[0]}">
+					<input type="checkbox" ng-model="filterCondition.trainType[0]" id="train-type" ng-true-value="true" ng-false-value="false" ng-change="trainTypeChange(0)" class="ng-pristine ng-untouched ng-valid ng-not-empty" />
+					<label for="train-type" class="icons fillorder-check"></label>
+					<span class="text">不限</span>
+				</span>
+			</div>
+			<div class="fliter-list">
+				<span class="checkbox checkbox-select" ng-class="{'active':filterCondition.trainType[1]}">
+					<input type="checkbox" ng-model="filterCondition.trainType[1]" id="train-type-1" ng-true-value="true" ng-false-value="false" ng-change="trainTypeChange(1)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="train-type-1" class="icons fillorder-check"></label>
+					G/C高铁
+				</span>
+				<span class="checkbox checkbox-select" ng-class="{'active':filterCondition.trainType[2]}">
+					<input type="checkbox" ng-model="filterCondition.trainType[2]" id="train-type-2" ng-true-value="true" ng-false-value="false" ng-change="trainTypeChange(2)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="train-type-2" class="icons fillorder-check"></label>
+					D动车
+				</span>
+				<span class="checkbox checkbox-select" ng-class="{'active':filterCondition.trainType[3]}">
+					<input type="checkbox" ng-model="filterCondition.trainType[3]" id="train-type-3" ng-true-value="true" ng-false-value="false" ng-change="trainTypeChange(3)" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="train-type-3" class="icons fillorder-check"></label>
+					普通
+				</span>
+			</div>
+			<div class="more-choice" ng-click="moreChoice = false">
+				收起筛选
+				<i class="icons train-seach-up"></i>
+			</div>
+		</div>
+	</div>
+	
+	<div class="train-ticket-lists">
+		<div class="thead">
+			<ul>
+				<li>车次信息</li>
+				<li class="pointer timeasc" ng-class="{'timeasc': sort!=='deptTime' || !desc, 'timedesc' : sort==='deptTime' &amp;&amp; desc}" ng-click="sort='deptTime'; desc = !desc; trainTicketListSort(trainSortBuff, sort , desc , sortCheck)">
+					发/到时间 <i class="icons icon-asc"></i>
+				</li>
+				<li>发/到站</li>
+				<li class="pointer runtimeasc" ng-class="{'runtimeasc': sort!=='runTime' || !desc, 'runtimedesc': sort==='runTime' &amp;&amp; desc}" ng-click="sort='runTime'; desc = !desc; trainTicketListSort(trainSortBuff, sort , desc , sortCheck)">
+					运行时长 <i class="icons icon-asc"></i>
+				</li>
+				<li class="pointer priceasc" ng-class="{'priceasc': sort!=='seatPrice' || !desc, 'pricedesc': sort==='seatPrice' &amp;&amp; desc}" ng-click="sort='seatPrice'; desc = !desc; trainTicketListSort(trainSortBuff, sort , desc , sortCheck)">
+					票价 <i class="icons icon-asc"></i>
+				</li>
+				<li class="seatnumasc">	
+					余票
+				</li>
+				<li class="checkbox-select">
+					<input type="checkbox" ng-model="sortCheck" id="train-show" ng-true-value="true" ng-change="trainTicketListSort(trainSortBuff, sort , desc , sortCheck)" ng-false-value="false" class="ng-pristine ng-untouched ng-valid ng-empty" />
+					<label for="train-show" class="icons fillorder-check"></label>
+					只显示有票车次
+				</li>
+			</ul>
+		</div>
+		<!-- ngRepeat: item in trainInfos.trainInfos --><!-- ngIf: !item.stop && !isEmpty --><div class="ticket-table ng-scope" ng-if="!item.stop &amp;&amp; !isEmpty" ng-repeat="item in trainInfos.trainInfos">
+			<table class="table">
+				<tbody>
+					<tr class="clear-fixed">
+						<td ng-mouseleave="item.processShow = false">
+							<p class="ng-binding">D902</p>
+							<div class="process">
+								<p ng-mouseover="queryStopStations(item.trainCode)">
+									经停 <i class="icons tg-down" ng-class="{'tg-down':!item.processShow,'tg-up':item.processShow}"></i>
+								</p>
+								<div class="process-explain ng-hide" ng-show="item.processShow">
+					                    <em class="triangle"></em>
+					                    <span></span>
+					                    <div class="contente">
+					                    	<table>
+						                    	<thead>
+						                    		<tr>
+						                    			<th>站次</th>
+						                    			<th>站名</th>
+						                    			<th>到站时间</th>
+						                    			<th>出发时间</th>
+						                    			<th>停留时间</th>
+						                    		</tr>
+						                    	</thead>
+						                    	<tbody>
+						                    		<!-- ngRepeat: (key, value) in item.stopStations -->
+						                    	</tbody>
+						                    </table>
+					                    </div>
+				                </div>
+							</div>
+						</td>
+						<td>
+							<p class="ng-binding">19:34</p>
+							<p class="ng-binding">05:25</p>
+						</td>
+						<td>
+							<p class="ng-binding"><!-- ngIf: item.startStation == true --><!-- ngIf: item.startStation == false --><i class="icons train-mid-station ng-scope" ng-if="item.startStation == false"></i><!-- end ngIf: item.startStation == false -->深圳北</p>
+							<p> </p>
+							<p class="ng-binding"><!-- ngIf: item.endStation == true --><!-- ngIf: item.endStation == false --><i class="icons train-mid-station ng-scope" ng-if="item.endStation == false"></i><!-- end ngIf: item.endStation == false -->石家庄</p>
+						</td>
+						<td class="ng-binding">
+							09小时51分钟
+						</td>
+						<td class="clear-fixed">
+							<!-- ngRepeat:  seat in item.seatList --><div class="set-message clear-fixed ng-scope" ng-repeat=" seat in item.seatList">
+								<div>
+									<span class="seat-name ng-binding">二等座</span>
+									<!-- ngIf: seat.seatPrice !== ''  --><span class="money active  ng-binding ng-scope" ng-if="seat.seatPrice !== '' ">¥669.5</span><!-- end ngIf: seat.seatPrice !== ''  -->
+									<!-- ngIf: seat.seatPrice === ''  -->
+								</div>
+								<div>
+									<!-- ngIf: seat.showButton !== 3 --><span ng-if="seat.showButton !== 3" ng-class="{'active': seat.seatNum !== '0'}" class="ng-binding ng-scope active">
+										19 张
+									</span><!-- end ngIf: seat.showButton !== 3 -->
+									<!-- ngIf: seat.showButton === 3 -->
+								</div>
+								<div>
+									<!-- ngIf: seat.showButton === 2 -->
+									<!-- ngIf: seat.showButton === 3 -->
+									<!-- ngIf: seat.showButton === 1 --><button class="active ng-scope" ng-if="seat.showButton === 1" ng-click="submitReserve(item,$index)">
+										预订
+									</button><!-- end ngIf: seat.showButton === 1 -->
+								</div>
+							</div><!-- end ngRepeat:  seat in item.seatList -->
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div><!-- end ngIf: !item.stop && !isEmpty --><!-- end ngRepeat: item in trainInfos.trainInfos --><!-- ngIf: !item.stop && !isEmpty --><div class="ticket-table ng-scope" ng-if="!item.stop &amp;&amp; !isEmpty" ng-repeat="item in trainInfos.trainInfos">
+			<table class="table">
+				<tbody>
+					<tr class="clear-fixed">
+						<td ng-mouseleave="item.processShow = false">
+							<p class="ng-binding">D904</p>
+							<div class="process">
+								<p ng-mouseover="queryStopStations(item.trainCode)">
+									经停 <i class="icons tg-down" ng-class="{'tg-down':!item.processShow,'tg-up':item.processShow}"></i>
+								</p>
+								<div class="process-explain ng-hide" ng-show="item.processShow">
+					                    <em class="triangle"></em>
+					                    <span></span>
+					                    <div class="contente">
+					                    	<table>
+						                    	<thead>
+						                    		<tr>
+						                    			<th>站次</th>
+						                    			<th>站名</th>
+						                    			<th>到站时间</th>
+						                    			<th>出发时间</th>
+						                    			<th>停留时间</th>
+						                    		</tr>
+						                    	</thead>
+						                    	<tbody>
+						                    		<!-- ngRepeat: (key, value) in item.stopStations -->
+						                    	</tbody>
+						                    </table>
+					                    </div>
+				                </div>
+							</div>
+						</td>
+						<td>
+							<p class="ng-binding">19:45</p>
+							<p class="ng-binding">05:30</p>
+						</td>
+						<td>
+							<p class="ng-binding"><!-- ngIf: item.startStation == true --><!-- ngIf: item.startStation == false --><i class="icons train-mid-station ng-scope" ng-if="item.startStation == false"></i><!-- end ngIf: item.startStation == false -->深圳北</p>
+							<p> </p>
+							<p class="ng-binding"><!-- ngIf: item.endStation == true --><!-- ngIf: item.endStation == false --><i class="icons train-mid-station ng-scope" ng-if="item.endStation == false"></i><!-- end ngIf: item.endStation == false -->石家庄</p>
+						</td>
+						<td class="ng-binding">
+							09小时45分钟
+						</td>
+						<td class="clear-fixed">
+							<!-- ngRepeat:  seat in item.seatList --><div class="set-message clear-fixed ng-scope" ng-repeat=" seat in item.seatList">
+								<div>
+									<span class="seat-name ng-binding">二等座</span>
+									<!-- ngIf: seat.seatPrice !== ''  --><span class="money active  ng-binding ng-scope" ng-if="seat.seatPrice !== '' ">¥669.5</span><!-- end ngIf: seat.seatPrice !== ''  -->
+									<!-- ngIf: seat.seatPrice === ''  -->
+								</div>
+								<div>
+									<!-- ngIf: seat.showButton !== 3 --><span ng-if="seat.showButton !== 3" ng-class="{'active': seat.seatNum !== '0'}" class="ng-binding ng-scope">
+										0 张
+									</span><!-- end ngIf: seat.showButton !== 3 -->
+									<!-- ngIf: seat.showButton === 3 -->
+								</div>
+								<div>
+									<!-- ngIf: seat.showButton === 2 --><button class="no-active ng-scope" ng-if="seat.showButton === 2" ng-click="submitReservation(item,$index)">
+										抢票
+									</button><!-- end ngIf: seat.showButton === 2 -->
+									<!-- ngIf: seat.showButton === 3 -->
+									<!-- ngIf: seat.showButton === 1 -->
+								</div>
+							</div><!-- end ngRepeat:  seat in item.seatList -->
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div><!-- end ngIf: !item.stop && !isEmpty --><!-- end ngRepeat: item in trainInfos.trainInfos --><!-- ngIf: !item.stop && !isEmpty --><div class="ticket-table ng-scope" ng-if="!item.stop &amp;&amp; !isEmpty" ng-repeat="item in trainInfos.trainInfos">
+			<table class="table">
+				<tbody>
+					<tr class="clear-fixed">
+						<td ng-mouseleave="item.processShow = false">
+							<p class="ng-binding">D928</p>
+							<div class="process">
+								<p ng-mouseover="queryStopStations(item.trainCode)">
+									经停 <i class="icons tg-down" ng-class="{'tg-down':!item.processShow,'tg-up':item.processShow}"></i>
+								</p>
+								<div class="process-explain ng-hide" ng-show="item.processShow">
+					                    <em class="triangle"></em>
+					                    <span></span>
+					                    <div class="contente">
+					                    	<table>
+						                    	<thead>
+						                    		<tr>
+						                    			<th>站次</th>
+						                    			<th>站名</th>
+						                    			<th>到站时间</th>
+						                    			<th>出发时间</th>
+						                    			<th>停留时间</th>
+						                    		</tr>
+						                    	</thead>
+						                    	<tbody>
+						                    		<!-- ngRepeat: (key, value) in item.stopStations -->
+						                    	</tbody>
+						                    </table>
+					                    </div>
+				                </div>
+							</div>
+						</td>
+						<td>
+							<p class="ng-binding">19:55</p>
+							<p class="ng-binding">05:45</p>
+						</td>
+						<td>
+							<p class="ng-binding"><!-- ngIf: item.startStation == true --><!-- ngIf: item.startStation == false --><i class="icons train-mid-station ng-scope" ng-if="item.startStation == false"></i><!-- end ngIf: item.startStation == false -->深圳北</p>
+							<p> </p>
+							<p class="ng-binding"><!-- ngIf: item.endStation == true --><!-- ngIf: item.endStation == false --><i class="icons train-mid-station ng-scope" ng-if="item.endStation == false"></i><!-- end ngIf: item.endStation == false -->石家庄</p>
+						</td>
+						<td class="ng-binding">
+							09小时50分钟
+						</td>
+						<td class="clear-fixed">
+							<!-- ngRepeat:  seat in item.seatList --><div class="set-message clear-fixed ng-scope" ng-repeat=" seat in item.seatList">
+								<div>
+									<span class="seat-name ng-binding">二等座</span>
+									<!-- ngIf: seat.seatPrice !== ''  --><span class="money active  ng-binding ng-scope" ng-if="seat.seatPrice !== '' ">¥669.5</span><!-- end ngIf: seat.seatPrice !== ''  -->
+									<!-- ngIf: seat.seatPrice === ''  -->
+								</div>
+								<div>
+									<!-- ngIf: seat.showButton !== 3 --><span ng-if="seat.showButton !== 3" ng-class="{'active': seat.seatNum !== '0'}" class="ng-binding ng-scope">
+										0 张
+									</span><!-- end ngIf: seat.showButton !== 3 -->
+									<!-- ngIf: seat.showButton === 3 -->
+								</div>
+								<div>
+									<!-- ngIf: seat.showButton === 2 --><button class="no-active ng-scope" ng-if="seat.showButton === 2" ng-click="submitReservation(item,$index)">
+										抢票
+									</button><!-- end ngIf: seat.showButton === 2 -->
+									<!-- ngIf: seat.showButton === 3 -->
+									<!-- ngIf: seat.showButton === 1 -->
+								</div>
+							</div><!-- end ngRepeat:  seat in item.seatList -->
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div><!-- end ngIf: !item.stop && !isEmpty --><!-- end ngRepeat: item in trainInfos.trainInfos -->
+
+		<div class="poploading ng-hide" ng-show="popLoading">
+			<div class="loading">
+				<img alt="" src="./images/loading.gif" />
+				<p class="text-center">加载中...</p>
+			</div>
+		</div>
+		<div class="search-empty ng-hide" ng-show="isEmpty">
+				<i class="icons icon-empty"></i>很抱歉，暂未查询到符合您要求的车次。
+		</div>
+	</div>	
+</div></trainticket-lists>
+        </div>
+        
+        <!--购票说明-->
+        <ng-scroll class-name="train-ticket-explain" scroll-class="train-ticket-explain-scroll" top-valve="204" class="ng-isolate-scope">
+
+<div ng-class="{'ng-scroll train-ticket-explain-scroll':scroll,}" class="train-ticket-explain" ng-transclude="">   
+            <div class="ng-scope">
+                <div>
+                    <p class="title">温馨提示</p>
+                    <p>自取票(预售期一般是60天)</p>
+                    <p>06:00-23:00支付完成,2小时内通知购票结果;</p>
+                    <p>23:00-6:00不支持下单.</p>
+                </div>
+                <div>
+                    <p>短信通知:</p>
+                    <p>购票后将短信通知是否购票成功,如因运营商网关延迟可能导致您无法及时接受短信,请到订单中心查看出票情况.</p>
+                </div>
+                <div>
+                    <p>退票须知:</p>
+                    <p>在线退票时间: 6:00-22:50,退款将于1-7个工作日退回原支付账户;</p>
+                    <p>已取纸质票或离发车时间小于35分钟,请前往车站窗口办理退票;</p>
+                    <p>车站窗口退票或改签,退款7-15个工作日左右退回原支付账号;</p>
+                    <p>暂不支持在线改签</p>
+                </div>
+            </div>
+        </div>
+</ng-scroll>
+    </div>
+</div>
+</div></div>
+
+<div class="footer ng-scope">
+	<!-- promise content -->
+	<!-- ngIf: $state.current.name !== 'home' --><div class="promise ng-scope" ng-if="$state.current.name !== 'home'">
+		<div class="container">
+			<ul>
+				<li>
+					<div class="promise-content">
+						<i class="icons icon-fast"></i>
+						<div class="promise-info">
+							<p>放心价格</p>
+							<small>官方最低折扣</small>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="promise-content">
+						<i class="icons icon-free"></i>
+						<div class="promise-info">
+							<p>灵活选择</p>
+							<small>最大程度满足您的个性化需求</small>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="promise-content">
+						<i class="icons icon-refund"></i>
+						<div class="promise-info">
+							<p>快速反馈</p>
+							<small>第一时间短信通知</small>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="promise-content">
+						<i class="icons icon-convenient"></i>
+						<div class="promise-info">
+							<p>退款无忧</p>
+							<small>即时退款</small>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div><!-- end ngIf: $state.current.name !== 'home' -->
+
+	<div class="footer-center">
+		<div class="container">
+			<div class="foot-center-contact">
+				<div class="contact">
+					<h2>网约车客服电话: 400-806-5833</h2>
+					<h2>火车票客服电话: 400-629-4999</h2>
+					<h2>汽车票客服电话: 400-629-4999</h2>
+					<p>客服服务时间：09:00-22:00</p>
+				</div>
+				<div class="contact-icon">
+					<a href="mailto:service@12306.com" target="_blank">
+						<span class="icons icon-footemail"></span>
+					</a>
+					<a class="foot-wechart">
+						<span class="icons icon-footwechat"></span>
+					</a>
+				</div>
+			</div>
+
+			<!--<ul>
+                <li>
+                    <h3>关于我们</h3>
+                    <div class="article">
+                        <p><a ui-sref="information" >资讯动态</a></p>
+                        <p><a ui-sref="companyprofile" >公司简介</a></p>
+                        <p><a ui-sref="legalnotice" >法律声明</a></p>
+                    </div>
+                </li>
+                <li>
+                    <h3>加盟合作</h3>
+                    <div class="article">
+                        <p><a ui-sref="advertisement" >广告合作</a></p>
+                        <p><a ui-sref="businessjoin" >业务加盟</a></p>
+                    </div>
+                </li>
+                <li>
+                    <h3>加入我们</h3>
+                    <div class="article">
+                        <p><a ui-sref="contactway" >联系方式</a></p>
+                        <p><a ui-sref="recruit" >诚聘英才</a></p>
+                    </div>
+                </li>
+                <li>
+                    <h3>帮助中心</h3>
+                    <div class="article">
+                        <p><a ui-sref="faq" >常见问题</a></p>
+                        <p><a ui-sref="complaintadvice" >投诉建议</a></p>
+                        <p><a ui-sref="service" >客服中心</a></p>
+                    </div>
+                </li>
+            </ul>-->
+			<ul class="homePageArticles">
+				<!-- ngRepeat: item in articlesHomePage track by $index --><li ng-repeat="item in articlesHomePage track by $index" class="ng-scope">
+					<h3 class="ng-binding">关于我们</h3>
+					<!-- ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/3" class="ng-binding" href="#/article/content/3">资讯动态</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/1" class="ng-binding" href="#/article/content/1">公司简介</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/2" class="ng-binding" href="#/article/content/2">法律声明</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index -->
+
+				</li><!-- end ngRepeat: item in articlesHomePage track by $index --><li ng-repeat="item in articlesHomePage track by $index" class="ng-scope">
+					<h3 class="ng-binding">加盟合作</h3>
+					<!-- ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/4" class="ng-binding" href="#/article/content/4">广告合作</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/5" class="ng-binding" href="#/article/content/5">业务加盟</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index -->
+
+				</li><!-- end ngRepeat: item in articlesHomePage track by $index --><li ng-repeat="item in articlesHomePage track by $index" class="ng-scope">
+					<h3 class="ng-binding">加入我们</h3>
+					<!-- ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/6" class="ng-binding" href="#/article/content/6">联系方式</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/7" class="ng-binding" href="#/article/content/7">诚聘英才</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index -->
+
+				</li><!-- end ngRepeat: item in articlesHomePage track by $index --><li ng-repeat="item in articlesHomePage track by $index" class="ng-scope">
+					<h3 class="ng-binding">帮助中心</h3>
+					<!-- ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/faq" class="ng-binding" href="#/faq">常见问题</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="page" class="ng-binding" href="#/page">投诉建议</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index --><span ng-repeat="articles in item.articles track by $index" class="ng-scope">                		
+                		<div class="article">
+                			<p><a ui-sref="/article/content/10" class="ng-binding" href="#/article/content/10">客服中心</a></p>
+                		</div>
+                	</span><!-- end ngRepeat: articles in item.articles track by $index -->
+
+				</li><!-- end ngRepeat: item in articlesHomePage track by $index -->
+			</ul>
+			<div class="codeimg mr20">
+				<img src="./images/wechat-qrcode.jpg" alt="点点出行微信公众号" />
+				<p>点点出行微信公众号</p>
+			</div>
+			<!--    <div class="codeimg">
+                <img src="http://12306.com/ddcx-app" alt="点点出行APP客户端">
+                <p>扫一扫，下载点点出行APP</p>
+            </div> -->
+
+		</div>
+	</div>
+
+	<div class="footer-bottom">
+		<div class="container">
+			<div class="copyright">
+				<p>
+					Copyright(C)2017 点点出行 版权所有 粤ICP备15107854号 如您有任何疑问和建议，请与我们联系：
+					<a href="mailto:service@12306.com">service@12306.com</a>
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<sidebar class="ng-scope ng-isolate-scope"><div class="sidebar">
+	<div class="sidebar-content">
+		<ul>
+			<li class="scrolltop" ng-click="scrollTop()" id="backTop">
+				<span class="icons icon-scrolltop"></span>
+				<p class="sidebar-text">返回顶部</p>
+			</li>
+			<li class="suggestion">
+				<a href="#/">
+					<span class="icons icon-suggestion"></span>
+					<p class="sidebar-text">投诉建议</p>
+				</a>
+			</li>
+		<!-- 	<li class="downloadapp">
+				<span class="icons icon-downloadapp"></span>
+				<p class="sidebar-text">下载APP</p>
+				<div class="downloadapp-pop">
+					<img src="http://12306.com/ddcx-app" alt="扫一扫，下载二维码" width="165">
+					<h3>
+						<span class="icons icon-sweep"></span>
+						扫一扫<br/>下载点点出行APP
+					</h3>
+					<span class="icons icon-sidearr"></span>
+				</div>
+			</li> -->
+			<li class="contacttel">
+				<span class="icons icon-contacttel"></span>
+				<p class="sidebar-text">联系电话</p>
+				<div class="contacttel-pop">
+					<p>点点出行客户电话</p>
+					<h3>400-629-4999</h3>
+					<span class="icons icon-sidearr"></span>
+				</div>
+			</li>
+		</ul>
+	</div>
+</div></sidebar></section>
+        <!-- ngInclude: ui.config.templateUrl -->
+        <!-- loading -->
+        <!-- ngIf: ui.config.loading -->
+
+
+        <div style="display: none">
+            <script src="https://s11.cnzz.com/z_stat.php?id=1261390327&amp;web_id=1261390327" language="JavaScript"></script><script src="https://c.cnzz.com/core.php?web_id=1261390327&amp;t=z" charset="utf-8" type="text/javascript"></script><a href="http://www.cnzz.com/stat/website.php?web_id=1261390327" target="_blank" title="站长统计">站长统计</a>
+        </div>
+    <script type="text/javascript" src="script/vendor.b2c33f.js"></script><script type="text/javascript" src="script/app.b2c33f.js"></script>
+<div class="rd-container rd-container-attachment" style="left: 636.906px; top: 149px;"></div></body></html>

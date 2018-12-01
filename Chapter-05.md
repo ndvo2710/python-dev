@@ -179,7 +179,7 @@ if __name__ == '__main__':
 ### 准备
 安装scrapy
 
-pip install 'd:\Twisted-18.9.0-cp36-cp36m-win_amd64.whl'
+pip install d:\Twisted-18.9.0-cp36-cp36m-win_amd64.whl
 pip install scrapy
 pip install pypiwin32
 
@@ -282,7 +282,7 @@ start_requests 必须返回一个可迭代的请求（可以返回请求列表�
 parse  对请求的响应结果进行处理。通常会解析响应，将抽取的数据作为dicts提取，并查找要跟踪的新URL并从中创建新请求（Request）
 
 运行spider
-
+进入tutorial/tutorial内
 `scrapy crawl quotes`
 在当前目录下生产两个html文件
 Scrapy Scheduler 调度由Spider的start_requests方法返回的scrapy.Request对象,收到请求后，实例化Reponse对象并调用callback方法(self.parse()),井Reponse做为参数传递
@@ -455,7 +455,7 @@ class TutorialItem(scrapy.Item):
 
 修改spider 使用item 类
  ```
- import scrapy
+import scrapy
 from tutorial.items import TutorialItem
 
 
@@ -478,7 +478,7 @@ class QuotesSpider(scrapy.Spider):
             yield response.follow(next_page, callback=self.parse)
  ```
 
- 使用piplinies
+ 使用pipelines
 
 修改tutorial/piplines.py
  ```
@@ -529,7 +529,7 @@ class TutorialPipeline(object):
 
  添加数据库配置
  ```
- MYSQL_HOST='localhost'
+MYSQL_HOST='localhost'
 MYSQL_DATABASE='test'
 MYSQL_USER='root'
  ```
