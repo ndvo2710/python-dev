@@ -116,7 +116,7 @@ class PhantomjsMiddleware(object):
             chrome_options=chrome_options) 
             # driver = webdriver.Firefox()
             driver.get(request.url)
-            time.sleep(5)
+            time.sleep(15)
             body = driver.page_source
             return HtmlResponse(driver.current_url, body=body, encoding='utf-8', request=request)
         else:
