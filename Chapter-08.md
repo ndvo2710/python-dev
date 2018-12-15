@@ -267,15 +267,7 @@ urlpatterns += [
 ]
 ```
 
-重定向http://127.0.0.1:8000到http://127.0.0.1:8000/catalog
 
-```
-#Add URL maps to redirect the base URL to our application
-from django.views.generic import RedirectView
-urlpatterns += [
-    path('', RedirectView.as_view(url='/catalog/')),
-]
-```
 
 在catalog文件夹里创建一个名为 urls.py 的文件, 添加下面的代码urlpatterns. 我们会在编写应用时添加相关式样。
 ```
