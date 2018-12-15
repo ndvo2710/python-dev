@@ -258,17 +258,6 @@ urlpatterns = [
 ```
 
 
-
-在urlpatterns 列表的下面一行插入下面的代码。这个新的URL定义把所有的catalog式样的网络请求放在模块 catalog.urls里处理 (使用相对路径 URL /catalog/urls.py).
-```
-
-urlpatterns += [
-    path('catalog/', include('catalog.urls')),
-]
-```
-
-
-
 在catalog文件夹里创建一个名为 urls.py 的文件, 添加下面的代码urlpatterns. 我们会在编写应用时添加相关式样。
 ```
 from django.urls import path
@@ -279,6 +268,11 @@ from . import views
 urlpatterns = [
     path('', views.index),
 ]
+```
+
+初始话数据库
+```
+python.exe manage.py migrate
 ```
 
 ### 数据库
@@ -293,7 +287,7 @@ python manage.py migrate
 注意： 每次模型改变，都需要运行以上命令，来影响需要存储的数据结构（包括添加和删除整个模型和单个字段）
 
 makemigrations 命令创建（但不适用）项目中安装的所有应用程序的迁移（你可以指定应用程序名称，也可以为单个项目运行迁移）
-这 migrate 命令 明确应用迁移你的数据库（Django跟踪哪些已添加到当前数据库）
+这migrate命令明确应用迁移你的数据库（Django跟踪哪些已添加到当前数据库）
 
 
 ## 使用模型
@@ -304,15 +298,10 @@ Django Web应用程序通过被称为model的Python对象访问和管理数据�
 
 在开始编写模型之前，花几分钟时间考虑我们需要存储的数据以及不同对象之间的关系。
 
-我们知道，我们需要存储书籍的信息（标题，摘要，作者，语言，类别，ISBN），并且我们可能有多个副本（具有全球唯一的ID，可用性状态等）。我们可以存储更多关于作者的信息，而不仅仅是他的名字，或多个作者的相同或相似的名称。我们希望能根据书名，作者名，语言和类别对信息进行排序。
-
-在设计模型时，为每个“对象”（相关信息组）分别设置模型时有意义的。在这种情况下，明显的对象是书籍，书籍实例和作者。。
-
-你可以想要使用模型来表示选择列表选项（例如：选择下拉列表），不应该硬编码选项进网站—这是当所有选项面临未知或改变时候的建议。在本网站，模型的明显之处包括书籍类型（例如：科幻小说，法国诗歌等）和语言（英语，法语，日语）。
+我们知道，我们需要存储书籍的信息（标题，摘要，作者，语言，类别，ISBN），并且我们可能有多个副本.
 
 一旦我们已经决定了我们的模型和字段，我们需要考虑它们的关联性。Django允许你来定义一对一的关联（OneToOneField），一对多（ForeignKey）和多对多（ManyToManyField）。
 
-思考一下，在网站中，我们将定义模型展示在下面UML关联图中（下图）。以上，我们创建了书的模型（书的通用细节），书的实例（系统中特定的一本书—借—有），和作者。我们也决定了个类型模型，以便通过管理界面创建／选择值。我们决定没有一个模型 BookInstance：status—我们硬编码了值（LOAN_STATUS），因为我们不希望这改变。在每个框中，你可以看到模型名称，字段名称和类型，以及方法和返回类型。
 
 该图显示模型之间的关系，包括它们的多重性。多重性是图中的数字，显示可能存在于关系中的每个模型的数量（最大值和最小值）。例如，盒子之间的连接线显示书和类型相关。书模型中数字表明，一本书必须有一个或多个类别（尽可能多），而类型旁边的线的另一端的数字表明它可以有零个或更多的关联书
 
@@ -434,7 +423,7 @@ def get_absolute_url(self):
 
  假设你将使用URL/myapplication/mymodelname/2 来显示模型的单个记录（其中“2”是 id 特定 记录），则需要创建一个URL映射器来将响应和id传递给 “模型详细视图” （这将做出显示记录所需的工作）。以上示例中，reverse() 函数可以“反转”你的url映射器（在上诉命名为“model-detail-view” 的案例中，以创建正确格式的URL。
 
- **模型管理**
+**模型管理**
 
  一旦你定义了模型类，你可以使用它们来创建，更新或删除记录，并运行查询获取所有记录或特定的记录子集。当我们定义我们的视图，我们将展示给你在这个教程如何去做。
 
@@ -461,32 +450,7 @@ print(a_record.my_field_name) # should print 'Instance #1'
 a_record.my_field_name="New Instance Name"
 a_record.save()
  ```
-
- 搜索记录
-
- 你可以使用模型的 objects（基类提供）搜索符合特定条件的记录。
-
- 我们通过 QuerySet 获取一个模型的所有记录，使用 object.all()。这个QuerySet是个可迭代的对象，意味着它包括一些可以迭代/循环的对象。
-
- ```
- all_books = Book.objects.all()
- ```
-
- Django的 filter() 方法允许我们根据特定的标准过滤 返回QuerySet 的匹配指定的文本或数字字段。例如，要过滤在标题包含 “wild”和对其计数，我们可以像下面那样做。
-
- ```
-wild_books = Book.objects.filter(title__contains='wild')
-number_wild_books = Book.objects.filter(title__contains='wild').count()
- ```
-注意： 双下划线和大写敏感
-
-在某些情况下，你需要去过滤—定义了一对多关系到另一个模型的字段。在这种情况下，你可以使用附加双重下划线在相关模型中"索引"字段。例如，过滤特定类型模式的书，你将不得不索引类型字段名，如下：
-
-```
-books_containing_genre = Book.objects.filter(genre__name__icontains='fiction')
-```
-Book 所管关联的Genre模型中，字段名为name的字段值中包含fiction字符串的
-注意：icontains忽略大小写，contains 区分大小写
+ 
 
 ### 定义LocalLibrary模型
 
@@ -554,6 +518,9 @@ author字段中null = True，意思如果没有选择作者，则允许数据库
 
 该模型还定义__str __（），使用书籍的title字段来表示书的记录，get_absolute_url（）返回一个可用于访问此模型的详细记录的URL（为此，我们必须定义具有名称book-detail的URL映射，并定义关联的视图和模板）。
 
+
+
+ 
 
 **BookInstance model**
 
@@ -627,6 +594,33 @@ class Author(models.Model):
 ```
 
 该模型将作者定义为具有名字，姓氏，出生日期和死亡日期(可选)， __str__() 返回单条记录的名称，get_absolute_url() 方法，返回作者详细信息URL映射以获取用于显示单个作者的URL。class Meta ordering定义返回一个查询集时的排序
+
+使用django shell
+搜索记录
+
+ 你可以使用模型的 objects（基类提供）搜索符合特定条件的记录。
+
+ 我们通过 QuerySet 获取一个模型的所有记录，使用 object.all()。这个QuerySet是个可迭代的对象，意味着它包括一些可以迭代/循环的对象。
+
+ ```
+ all_books = Book.objects.all()
+ ```
+
+ Django的 filter() 方法允许我们根据特定的标准过滤 返回QuerySet 的匹配指定的文本或数字字段。例如，要过滤在标题包含 “wild”和对其计数，我们可以像下面那样做。
+
+ ```
+wild_books = Book.objects.filter(title__contains='wild')
+number_wild_books = Book.objects.filter(title__contains='wild').count()
+ ```
+注意： 双下划线和大写敏感
+
+在某些情况下，你需要去过滤—定义了一对多关系到另一个模型的字段。在这种情况下，你可以使用附加双重下划线在相关模型中"索引"字段。例如，过滤特定类型模式的书，你将不得不索引类型字段名，如下：
+
+```
+books_containing_genre = Book.objects.filter(genre__name__icontains='fiction')
+```
+Book 所管关联的Genre模型中，字段名为name的字段值中包含fiction字符串的
+注意：icontains忽略大小写，contains 区分大小写
 
 ### 重新运行数据库迁移
 ```
