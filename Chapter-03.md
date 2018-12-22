@@ -219,8 +219,8 @@ import threading, queue
 import time
 
 
-numconsumers = 2
-numproducers = 2
+numconsumers = 20
+numproducers = 20
 nummessages = 4
 
 lock = threading.Lock()
@@ -233,11 +233,12 @@ def producer(idnum):
 
 
 def consumer(idnum):
-    while not dataQueue.empty():
-        data = dataQueue.get(block=False)
+    while True:
+        data = dataQueue.get()
         with lock:
             print("consumer", idnum, "got => ", data)
         time.sleep(0.1)
+        dataQueue.task_done()
 
 if __name__ == "__main__":
     consumerThreads = []
@@ -248,12 +249,11 @@ if __name__ == "__main__":
         t.start()
     for i in range(numconsumers):
         t = threading.Thread(target=consumer, args=(i,))
+        t.daemon=True
         consumerThreads.append(t)
         t.start()
-    for t in producerThreads:
-        t.join()
-    for t in consumerThreads:
-        t.join()
+
+    dataQueue.join()
 ````
 
 类
