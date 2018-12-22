@@ -1,4 +1,4 @@
-#  第九天
+#  第八天
 
 ##  Django介绍
 Django是一个高级Python Web框架，鼓励快速开发和实用的设计。
@@ -423,6 +423,7 @@ def get_absolute_url(self):
 
  假设你将使用URL/myapplication/mymodelname/2 来显示模型的单个记录（其中“2”是 id 特定 记录），则需要创建一个URL映射器来将响应和id传递给 “模型详细视图” （这将做出显示记录所需的工作）。以上示例中，reverse() 函数可以“反转”你的url映射器（在上诉命名为“model-detail-view” 的案例中，以创建正确格式的URL。
 
+[models](https://docs.djangoproject.com/en/2.1/topics/db/models/)
 **模型管理**
 
  一旦你定义了模型类，你可以使用它们来创建，更新或删除记录，并运行查询获取所有记录或特定的记录子集。当我们定义我们的视图，我们将展示给你在这个教程如何去做。
@@ -450,7 +451,7 @@ print(a_record.my_field_name) # should print 'Instance #1'
 a_record.my_field_name="New Instance Name"
 a_record.save()
  ```
- 
+[query](https://docs.djangoproject.com/en/2.1/topics/db/queries/)
 
 ### 定义LocalLibrary模型
 
