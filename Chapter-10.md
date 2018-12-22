@@ -232,7 +232,7 @@ LOGIN_REDIRECT_URL = '/'
 如果打开登出网址（http://127.0.0.1:8000/accounts/logout/），那么会看到一些奇怪的行为 - 所属的用户肯定会被登出，但您将被带到管理员登出页面。这不是想要的，只是因为该页面上的登录链接，带到管理员登录屏幕（并且仅对具有is_staff权限的用户可用）。
 
 创建并打开 locallibrary/templates/registration/logged_out.html。将下面的文字，复制到文档中：
-```````
+```
 {% extends "base_generic.html" %}
 
 {% block content %}
