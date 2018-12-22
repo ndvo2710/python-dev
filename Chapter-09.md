@@ -1,4 +1,4 @@
-# 第十天
+# 第九天
 
 ## 创建主页
 
@@ -24,7 +24,7 @@
 + catalog/author/<id> — 详细视图。如下例子 /catalog/author/11，id为11的作者详情
 
 ### 创建主页
-打开locallibrary/catalog/urls.py 添加一下内容
+打开locallibrary/catalog/urls.py 修改以下内容
 
 ```
 urlpatterns = [
@@ -59,21 +59,22 @@ from .models import Book, Author, BookInstance, Genre
 
 def index(request):
     """
-    View function for home page of site.
+    首页视图
     """
-    # Generate counts of some of the main objects
+    # 统计图书的数目
     num_books=Book.objects.all().count()
     num_instances=BookInstance.objects.all().count()
-    # Available books (status = 'a')
+    # 可接图书的数目 (status = 'a')
     num_instances_available=BookInstance.objects.filter(status__exact='a').count()
-    num_authors=Author.objects.count()  # The 'all()' is implied by default.
+    num_authors=Author.objects.count()  # 作者的数目
     
-    # Render the HTML template index.html with the data in the context variable
+    # 渲染模板
     return render(
         request,
         'index.html',
         context={'num_books':num_books,'num_instances':num_instances,'num_instances_available':num_instances_available,'num_authors':num_authors},
     )
+
 ```
 
 视图函数的第一部分使用objects.all()模型类的属性来获取记录计数。它还会获取一个BookInstance状态字段值为“a”（可用）的对象列表。在函数结束时，我们将该函数称为render()创建和返回HTML页面作为响应。它将原始request对象，HTML模板以及context变量（Python字典）作为参数。
@@ -86,7 +87,7 @@ def index(request):
 
 index模版将需要标准的HTML标记头部和正文，以及用于导航的部分（去我们尚为创建的网站其他的页面）以及一些介绍文本来展示我们图书数据。我们网站上的每一页，大部分文字（HTML和导航结构）都是一样的。Django模版语言不是强制开发人员在每个页面中复制这个“样板”，而是让你声明一个基本模版，然后再扩展它，仅替换每个特定页面不同的位置。
 
-例如，基本模版 base_generic.html 可能看起来像下面的文本。正如你所见的，它包含一些“常见“HTML”和标题，侧边栏和使用命名 block 和 endblock 模版标记（粗体显示）标记的内容部分。块可以是空的，或者包含将被派生页“默认使用”的内容。
+例如，基本模版 base.html 可能看起来像下面的文本。正如你所见的，它包含一些“常见“HTML”和标题，侧边栏和使用命名 block 和 endblock 模版标记（粗体显示）标记的内容部分。块可以是空的，或者包含将被派生页“默认使用”的内容。
 
  模版标签（{% %}）,你可以在模版中使用函数循环列表，基于变量的值执行条件操作等。除了模版标签，模版语法允许你引用模版变量（通过从视图进入模版），并使用模版过滤器重新格式化变量（例如，将字符串设置为小写）。
 
@@ -108,7 +109,7 @@ index模版将需要标准的HTML标记头部和正文，以及用于导航的�
 例如，下面我们使用 extends 模版标签，并覆盖 content 块。生成的最终HTML将包含在基本模板中定义的所有HTML和结构（包括在标题栏中定义的默认内容），但插入新内容块代替默认内容块
 
 ```
-{% extends "base_generic.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <h1>Local Library Home</h1>
@@ -122,76 +123,195 @@ index模版将需要标准的HTML标记头部和正文，以及用于导航的�
 ```
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  
-  {% block title %}<title>Local Library</title>{% endblock %}
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  
-  <!-- Add additional CSS in static file -->
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SB Admin - Dashboard</title>
+
+    <!-- Bootstrap core CSS-->
+    <link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template-->
+    <link href="/static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Custom styles for this template-->
+    <link href="/static/css/sb-admin.css" rel="stylesheet">
+
 </head>
 
-<body>
+<body id="page-top">
 
-  <div class="container-fluid">
+    <nav class="navbar navbar-expand navbar-dark  bg-dark static-top">
 
-    <div class="row">
-      <div class="col-sm-2">
-      {% block sidebar %}
-      <ul class="sidebar-nav">
-          <li><a href="{% url 'index' %}">首页</a></li>
-          <li><a href="">图书</a></li>
-          <li><a href="">作者</a></li>
-      </ul>
-     {% endblock %}
-      </div>
-      <div class="col-sm-10 ">
-      {% block content %}{% endblock %}
+        <a class="navbar-brand mr-1" href="{% url "index" %}">图书管理平台</a>
 
-      </div>
+        <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+            <i class="fas fa-bars"></i>
+        </button>
+
+
+        <!-- Navbar -->
+        <ul class="navbar-nav  ml-auto ml-md-6">
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                    <i class="fas fa-user-circle fa-fw"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">Logout</a>
+                </div>
+            </li>
+        </ul>
+
+    </nav>
+
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="sidebar navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="{% url "index" %}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>概览</span>
+                </a>
+            </li>
+
+        </ul>
+
+        <div id="content-wrapper">
+
+            <div class="container-fluid">
+
+
+                {% block content %}
+                <!-- content-->
+
+                {% endblock %}
+
+            </div>
+            <!-- /.container-fluid -->
+
+            <!-- Sticky Footer -->
+            <footer class="sticky-footer">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright © jiaminqiang 2018</span>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+        <!-- /.content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">退出</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">选择 "退出" 如果你确认退出.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                    <a class="btn btn-primary" href=#>退出</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-  </div>
+    <!-- Bootstrap core JavaScript-->
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Page level plugin JavaScript-->
+
+    <!-- Custom scripts for all pages-->
+    <script src="/static/js/sb-admin.min.js"></script>
+    <script src="/static/js/multiselect.min.js"></script>
+
+ 
+
 </body>
+
 </html>
 ```
 
 该模版使用（并包含）JavaScript 和  Bootstrap  （css框架）来改进HTML页面的布局和显示，使用Bootstrap框架是创建一个可以在不同浏览器大小上很好地扩展的有吸引力的页面的快速方法，它还允许我们处理页面呈现而无需进入任何细节-我们只想关注服务器端代码.
 
-基本模板还引用了一个本地css文件（styles.css），它提供了一些额外的样式。创建locallibrary/catalog/static/css/styles.css并为其提供以下内容：
-```
-.sidebar-nav {
-    margin-top: 20px;
-    padding: 0;
-    list-style: none;
-}
-```
 
 **index模版**
 新建HTML文件 locallibrary/catalog/templates/index.html 写入下面代码。第一行我们扩展了我们的基本模版, 使用 content替换默认块。
 ```
-{% extends "base_generic.html" %}
-
-{% block content %}
-<h1>首页</h1>
-
-  <p>欢迎使用 <em>图书管理系统</em>.</p>
-
-<h2>动态内容</h2>
-
-  <p>概览:</p>
-  <ul>
-    <li><strong>图书:</strong> {{ num_books }}</li>
-    <li><strong>副本:</strong> {{ num_instances }}</li>
-    <li><strong>可以图书:</strong> {{ num_instances_available }}</li>
-    <li><strong>作者:</strong> {{ num_authors }}</li>
-  </ul>
-
+{% extends "base.html" %} {% block content %}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="#">概览</a>
+    </li>
+</ol>
+<div class="row">
+    <div class="col-xl-3 col-sm-6 mb-3">
+      <div class="card text-white bg-primary o-hidden h-100">
+        <div class="card-body">
+          <div class="card-body-icon">
+            <i class="fas fa-fw fa-comments"></i>
+          </div>
+          <div class="mr-5">图书种类: {{ num_books }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-3">
+      <div class="card text-white bg-warning o-hidden h-100">
+        <div class="card-body">
+          <div class="card-body-icon">
+            <i class="fas fa-fw fa-list"></i>
+          </div>
+          <div class="mr-5">图书数量: {{ num_instances }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-3">
+      <div class="card text-white bg-success o-hidden h-100">
+        <div class="card-body">
+          <div class="card-body-icon">
+            <i class="fas fa-fw fa-shopping-cart"></i>
+          </div>
+          <div class="mr-5">可接数量：{{ num_instances_available }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-3">
+      <div class="card text-white bg-danger o-hidden h-100">
+        <div class="card-body">
+          <div class="card-body-icon">
+            <i class="fas fa-fw fa-life-ring"></i>
+          </div>
+          <div class="mr-5">作者数量: {{ num_authors }}</div>
+        </div>
+     
+      </div>
+    </div>
+  </div>
 {% endblock %}
 ```
 
@@ -212,17 +332,6 @@ return render(
 
 
 
-在模版中，你首先调用 load 模板标签指定“ static”去添加此模版库。静态加载后，你可以使用 static 模版标签，指定文件相对URL
-```
-<!-- Add additional CSS in static file --> 
-{% load static %} 
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
-```
-你可以用同样的方式将图片添加到页面中：
-```
-{% load static %}
-<img src="{% static 'catalog/images/local_library_model_uml.png' %}" alt="My image" style="width:555px;height:540px;"/>
-```
 在settings.py中添加以下代码，
 ```
 STATIC_ROOT = BASE_DIR + '/catalog/static/'
@@ -232,7 +341,7 @@ STATIC_ROOT 全局指定静态文件位置
 ## 通用列表和详细视图
 
 ### 书本清单页面
-书本清单页面，将显示页面中所有可用图书记录的列表，使用url: catalog/books/进行访问。该页面将显示每条记录的标题和作者，标题是指向相关图书详细信息页面的超链接。该页面将具有与站点中，所有其他页面相同的结构和导航，因此，我们可以扩展在上一个教程中创建的基本模板（base_generic.html）。
+书本清单页面，将显示页面中所有可用图书记录的列表，使用url: catalog/books/进行访问。该页面将显示每条记录的标题和作者，标题是指向相关图书详细信息页面的超链接。
 
 **URL映射**
 
@@ -263,11 +372,14 @@ class BookListView(generic.ListView):
 可以添加属性，以更改上面的默认行为。例如，如果需要使用同一模型的多个视图，则可以指定另一个模板文件，或者如果book_list对于特定模板用例不直观，则可能需要使用不同的模板变量名称。可能最有用的变更，是更改/过滤返回的结果子集 - 因此，您可能会列出其他用户阅读的前5本书，而不是列出所有书本。
 
 ```
+from django.views import generic
+
 class BookListView(generic.ListView):
     model = Book
-    context_object_name = 'my_book_list'   # your own name for the list as a template variable
-    queryset = Book.objects.filter(title__icontains='war')[:5] # Get 5 books containing the title war
-    template_name = 'books/my_arbitrary_template_name_list.html'  # Specify your own template name/location
+    context_object_name = 'book_list'   # book list 变量的名称
+    queryset = Book.objects.all()
+    #queryset = Book.objects.filter(title__icontains='python')[:5] # 书名包含python的5本书 
+    template_name = 'book_list.html'  # 指定template名称
 ```
 context_object_name 更改模板中引用对象的名称
 queryset 更改默认的查询结果默认返回改modle的所有记录
@@ -280,24 +392,51 @@ template_name 更改默认的模板名称
 通用视图的模板就像任何其他模板一样（当然，传递给模板的上下文/信息可能不同）。与我们的index模板一样，我们在第一行扩展基本模板，然后替换名为content的区块。
 
  ```
- {% extends "base_generic.html" %}
+{% extends "base.html" %}
 
 {% block content %}
-    <h1>图书 列表视图</h1>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="#">图书列表</a>
+        </li>
+    </ol>
 
-    {% if book_list %}
-    <ul>
-
-      {% for book in book_list %}
-      <li>
-        <a href="{{ book.get_absolute_url }}">{{ book.title }}</a> ({{book.author}})
-      </li>
-      {% endfor %}
-
-    </ul>
-    {% else %}
-      <p>There are no books in the library.</p>
-    {% endif %}       
+    <div class="card mb-3">
+        <div class="card-header">
+          <i class="fas fa-table"></i>
+          图书列表
+          </div>
+        <div class="card-body">
+            {% if book_list %}
+            <div class="table">
+                    <table class="table  table-sm   table-hover" id="dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>书名</th>
+                                <th>作者</th>
+                                <th>ISBN</th>
+                                <th>列别</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in book_list %}
+                            <tr>
+                                <td>{{book.title}}</td>
+                                <td>{{book.author}}</td>
+                                <td>{{book.isbn}}</td>
+                                <td>{{book.genre }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p>There are no books in the library.</p>
+                  {% endif %}
+            </div>
+        </div>
+       
+      </div>
+           
 {% endblock %}
  ```
 
@@ -305,7 +444,7 @@ template_name 更改默认的模板名称
  我们使用 if, else 和 endif模板标签，来检查 book_list是否已定义且不为空。如果 book_list为空，则 else子句显示文本，说明没有要列出的书本。如果 book_list不为空，那么我们遍历书本列表
 
  ```
- {% if book_list %}
+{% if book_list %}
   <!-- code here to list the books -->
 {% else %}
   <p>There are no books in the library.</p>
@@ -324,10 +463,10 @@ template_name 更改默认的模板名称
 
 访问变量
 
-循环内的代码，为每本书创建一个列表项，显示作者和标题（作为尚未创建的详细视图的链接）。
+循环内的代码，为每本书创建一个列表项
 
 ```
-<a href="{{ book.get_absolute_url }}">{{ book.title }}</a> ({{book.author}})
+<td>{{book.title}}</td>
 ```
 
 我们使用“点符号”（例如 book.title 和 book.author）访问相关书本记录的字段，其中书本项目book后面的文本是字段名称（如同在模型中定义的）。
@@ -335,7 +474,7 @@ template_name 更改默认的模板名称
 我们还可以在模板中，调用模型中的函数 - 在这里，我们调用Book.get_absolute_url()，来获取可用于显示关联详细记录的URL。这项工作提供的函数没有任何参数（没有办法传递参数！）
 
 更新基本模板
-打开基本模板（/locallibrary/catalog/templates/base_generic.html）并将 {% url 'books' %} 插入所有书本 All books 的 URL 链接，如下所示。这将启用所有页面中的链接（由于我们已经创建了 “books” 的 url 映射器，我们可以成功地将其设置到位）
+打开基本模板（/locallibrary/catalog/templates/base.html）并将 {% url 'books' %} 插入所有书本 All books 的 URL 链接，如下所示。这将启用所有页面中的链接（由于我们已经创建了 “books” 的 url 映射器，我们可以成功地将其设置到位）
 
 
 ```
@@ -376,28 +515,45 @@ class BookDetailView(generic.DetailView):
 创建 HTML 文件 /locallibrary/catalog/templates/catalog/book_detail.html
 
 ```
-{% extends "base_generic.html" %}
+{% extends "base.html" %}
 
 {% block content %}
-  <h1>书名: {{ book.title }}</h1>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="#">图书详情</a>
+        </li>
+    </ol>
 
-  <p><strong>作者:</strong> <a href="">{{ book.author }}</a></p> <!-- author detail link not yet defined -->
-  <p><strong>摘要:</strong> {{ book.summary }}</p>
-  <p><strong>ISBN:</strong> {{ book.isbn }}</p> 
-  <p><strong>语言:</strong> {{ book.language }}</p>  
-  <p><strong>类别:</strong> {% for genre in book.genre.all %} {{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
+    <div class="card mb-3">
+        <div class="card-header">
+          <i class="fas fa-table"></i>
+          图书详情
+        </div>
+        <div class="card-body">
 
-  <div style="margin-left:20px;margin-top:20px">
-    <h4>副本</h4>
+                <h1>书名: {{ book.title }}</h1>
 
-    {% for copy in book.bookinstance_set.all %}
-    <hr>
-    <p class="{% if copy.status == 'a' %}text-success{% elif copy.status == 'm' %}text-danger{% else %}text-warning{% endif %}">{{ copy.get_status_display }}</p>
-    {% if copy.status != 'a' %}<p><strong>预计可借日期:</strong> {{copy.due_back}}</p>{% endif %}
-    <p><strong>版次:</strong> {{copy.imprint}}</p>
-    <p class="text-muted"><strong>Id:</strong> {{copy.id}}</p>
-    {% endfor %}
-  </div>
+                <p><strong>作者:</strong> <a href="">{{ book.author }}</a></p> <!-- author detail link not yet defined -->
+                <p><strong>摘要:</strong> {{ book.summary }}</p>
+                <p><strong>ISBN:</strong> {{ book.isbn }}</p> 
+                <p><strong>语言:</strong> {{ book.language }}</p>  
+                <p><strong>类别:</strong> {% for genre in book.genre.all %} {{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
+              
+                <div style="margin-left:20px;margin-top:20px">
+                  <h4>副本</h4>
+              
+                  {% for copy in book.bookinstance_set.all %}
+                  <hr>
+                  <p class="{% if copy.status == 'a' %}text-success{% elif copy.status == 'm' %}text-danger{% else %}text-warning{% endif %}">{{ copy.get_status_display }}</p>
+                  {% if copy.status != 'a' %}<p><strong>预计可借日期:</strong> {{copy.due_back}}</p>{% endif %}
+                  <p><strong>版次:</strong> {{copy.imprint}}</p>
+                  <p class="text-muted"><strong>Id:</strong> {{copy.id}}</p>
+                  {% endfor %}
+                </div>
+        </div>
+       
+      </div>
+           
 {% endblock %}
 ```
 此模板中的几乎所有内容，都已在前面描述过
@@ -418,6 +574,11 @@ class BookDetailView(generic.DetailView):
 
 get_status_display函数 获取choices属性的值
 
+修改book_list.html
+```
+<td><a href="{{ book.get_absolute_url }}">{{ book.title }}</a></td>
+```
+
 ### 分页
 
 记录少的时候，我们的图书清单页面看起来会很好。但是，当进入数十或数百条记录的页面时，页面将逐渐花费更长时间加载（并且有太多内容无法合理浏览）。此问题的解决方案，是为列表视图添加分页，减少每页上显示的项目数。
@@ -434,7 +595,7 @@ class BookListView(generic.ListView):
 
 现在数据已经分页，我们需要添加对模板的支持，以滚动结果集合。因为我们可能希望在所有列表视图中，都执行此操作，所以我们将以可添加到基本模板的方式，执行此操作。
 
-打开 /locallibrary/catalog/templates/base_generic.html，修改为以下内容。代码首先检查当前页面上，是否启用了分页。如果是，则它会根据需要，添加下一个和上一个链接（以及当前页码）。
+打开 /locallibrary/catalog/templates/base.html，修改为以下内容。代码首先检查当前页面上，是否启用了分页。如果是，则它会根据需要，添加下一个和上一个链接（以及当前页码）。
 
 ```
 {% block content %}{% endblock %}

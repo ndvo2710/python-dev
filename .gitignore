@@ -2,5 +2,6 @@
 venv/
 *.pyc
 Chapter-*-code/autotest/apiautotest/static/
+Chapter-*-code/locallibrary/catalog/static/
 .vscode/settings.json
 test.py
