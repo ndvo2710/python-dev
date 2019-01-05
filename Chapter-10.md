@@ -39,21 +39,7 @@ MIDDLEWARE = [
 
 会话session属性是一个类似字典的对象，您可以在视图中多次读取和写入，并根据需要进行修改。您可以执行所有常规的字典操作，包括清除所有数据，测试是否存在密钥，循环数据等。大多数情况下，您只需使用标准 “字典” API，来获取和设置值。
 
-下面的代码片段，显示了如何使用与当前会话（浏览器）关联的密钥“my_car”来获取，设置和删除某些数据。
 
-```
-# Get a session value by its key (e.g. 'my_car'), raising a KeyError if the key is not present
-my_car = request.session['my_car']
-
-# Get a session value, setting a default if it is not present ('mini')
-my_car = request.session.get('my_car', 'mini')
-
-# Set a session value
-request.session['my_car'] = 'mini'
-
-# Delete a session value 
-del request.session['my_car']
-```
 API还提供了许多其他方法，主要用于管理关联的会话cookie。例如，有一些方法，可以测试客户端浏览器，是否支持cookie，设置和检查cookie过期日期，以及从数据存储中清除过期的会话。你可以在[如何使用会话](https://docs.djangoproject.com/en/2.0/topics/http/sessions/)中找到完整的API。
 
 
@@ -82,23 +68,30 @@ API还提供了许多其他方法，主要用于管理关联的会话cookie。�
 这里，我们首先得到 session key  'num_visits'的值，如果之前没有设置，则将值设置为0。每次收到请求时，我们都会递增该值，并将其存回会话中（下次用户访问该页面时）。然后将num_visits变量，传递给上下文变量中的模板。
 
 
-编辑locallibrary/catalog/templates/index.html
+编辑locallibrary/catalog/templates/index.html 添加以下代码
 ```
-<h2>Dynamic content</h2>
-
-<p>The library has the following record counts:</p>
-<ul>
-  <li><strong>Books:</strong> {{ num_books }}</li>
-  <li><strong>Copies:</strong> {{ num_instances }}</li>
-  <li><strong>Copies available:</strong> {{ num_instances_available }}</li>
-  <li><strong>Authors:</strong> {{ num_authors }}</li>
-</ul>
-
-<p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
+<div class="row">
+  <div class="col-xl-3 col-sm-6 mb-3">
+    <div class="alert alert-warning">
+      <a href="#" data-dismiss="alert"></a>
+      {{ request.user }}-访问次数: <strong>{{ num_visits }}</strong>
+    </div>
+  </div>
+</div>
 ```
 
-## 身份验证和授权
+在后台数据库的django_session表中可以看到session的记录：
+session表包含3个字段 session_key、session_data、expire_date
+session_key 字段session的唯一标志，关联cookie中的sessionid
+seesion_data session信息,该字段使用了base64编码，要查看里面内容可使用base64解码
+```
+>>> import base64
+>>> base64.b64decode('YmEzZWZmZDY2YzdjOTIxMzRkZTdlMTg5ZTE3MmM3YmZhNDM2NzdmNjp7Il9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiI4MGM0YjZhODU0ZjVkMmNjODgyYjkyNjBkYTM4MzUyZTMxMDBlNDc0IiwibnVtX3Zpc2l0cyI6NH0=')
+b'ba3effd66c7c92134de7e189e172c7bfa43677f6:{"_auth_user_id":"1","_auth_user_backend":"django.contrib.auth.backends.ModelBackend","_auth_user_hash":"80c4b6a854f5d2cc882b9260da38352e3100e474","num_visits":4}'
+```
 
+
+## 身份验证
 Django 提供了一个身份验证和授权（“权限”）系统，该系统构建在的session框架之上，允许你验证用户凭据，并定义每个用户可允许执行的操作。该框架包括用户Users和分组Groups的内置model（一次向多个用户应用权限的通用方法），用于登录用户的权限/标志，以指定用户是否可以执行任务，表单和视图，以及查看限制内容的工具。
 
 
@@ -125,431 +118,448 @@ MIDDLEWARE = [
     ....
 ```
 
-### 创建用户和分组
-
-我们已经创建了第一个用户（这是一个超级用户，使用命令 python manage.py createsuperuser 创建）。我们的超级用户已经过身份验证，并拥有所有权限，因此我们需要创建一个测试用户，来代表普通网站用户。我们将使用管理站点，来创建我们的 locallibrary 组別和网站登录，因为这是最快的方法之一。
-
+### 设置登录url
+```
+path('login/',views.user_login, name='user_login'),
+```
 
 ### 设置身份验证视图
 
-Django 提供了创建身份验证页面所需的几乎所有功能，让处理登录，注销和密码管理等工作，都能 “开箱即用”。这些相关功能包括了 url 映射器，视图和表单，但它不包括模板 - 我们必须创建自己的模板！
-
-在本节中，我们将展示如何将默认系统，集成到 LocalLibrary 网站并创建模板。我们将它们放在主项目的 URL 当中。
-
-
-将以下内容，添加到项目 urls.py（locallibrary/locallibrary/urls.py）文件的底部
 ```
-#Add Django site authentication urls (for login, logout, password management)
-urlpatterns += [
-    path('accounts/', include('django.contrib.auth.urls')),
-]
-```
+from django.contrib.auth import authenticate, login, logout
 
-添加后打开http://127.0.0.1:8000/accounts/ 会显示404 
-
-
-我们访问http://127.0.0.1:8000/accounts/login/ 会显示找不到模板registration/login.html
-
-###  模板目录
-
-我们希望在模板搜索路径中的目录 /registration/ 某处，找到刚刚添加的 url（以及隐式视图）的关联模板。
-
-对于此站点，我们将 HTML 页面，放在 templates/registration/ 目录中。此目录应该位于项目的根目录中，即与 catalog 和 locallibrary 文件夹相同的目录）。请立即创建这些文件夹。 
-```
-locallibrary (django project folder)
-   |_catalog
-   |_locallibrary
-   |_templates (new)
-                |_registration
+def user_login(request):
+    if request.method == "GET":
+        return render(request, "login.html")
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("index")
+        else:
+            msg = "账号或密码错误"
+            return render(request,"login.html",{"msg": msg})
 ```
 
-注意改templates文件夹要和manage.py在同一目录
-修改settings.py
 
- ```
- TEMPLATES = [
-    {
-        ...
-        'DIRS': ['./templates',],
-        'APP_DIRS': True,
-        ...
- ```
 
 ### 登录模板
-创建一个名为 locallibrary/templates/registration/login.html 的新HTML文件。为它加入以下内容：
-```
-{% extends "base_generic.html" %}
-
-{% block content %}
-
-{% if form.errors %}
-  <p>Your username and password didn't match. Please try again.</p>
-{% endif %}
-
-{% if next %}
-  {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-  {% else %}
-    <p>Please login to see this page.</p>
-  {% endif %}
-{% endif %}
-
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-
-<div>
-  <td>{{ form.username.label_tag }}</td>
-  <td>{{ form.username }}</td>
-</div>
-<div>
-  <td>{{ form.password.label_tag }}</td>
-  <td>{{ form.password }}</td>
-</div>
-
-<div>
-  <input type="submit" value="login" />
-  <input type="hidden" name="next" value="{{ next }}" />
-</div>
-</form>
-
-{# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
-
-{% endblock %}
- ```
-如果尝试登录，登录后默认将跳转到http://127.0.0.1:8000/accounts/profile/ 但我们没有定义该url将导致404错误，修改默认跳转url
-
-打开项目设置（locallibrary/locallibrary/settings.py），并将下面的文本添加到底部。现在登录时，应该默认重定向到站点主页。
+创建一个名为 templates/login.html 的新HTML文件。为它加入以下内容：
 
 ```
-# Redirect to home URL after login (Default redirects to /accounts/profile/)
-LOGIN_REDIRECT_URL = '/'
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SB Admin - Login</title>
+
+    <!-- Bootstrap core CSS-->
+    <link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template-->
+    <link href="/static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template-->
+    <link href="/static/css/sb-admin.css" rel="stylesheet">
+
+  </head>
+
+  <body class="bg-dark">
+
+    <div class="container">
+      <div class="card card-login mx-auto mt-5">
+        <div class="card-header">登录</div>
+        <div class="card-body">
+          <form method="post" action="{% url 'user_login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <div class="form-label-group">
+                <input type="text" name="username" id="inputUser" class="form-control" placeholder="Email address" required="required" autofocus="autofocus">
+                <label for="inputUser">用户名</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label-group">
+                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required="required">
+                <label for="inputPassword">密码</label>
+              </div>
+            </div>
+            {% if msg %}
+                <div class="alert alert-warning">
+                    <a href="#" class="close" data-dismiss="alert">
+                        &times;
+                    </a>
+                    <strong>警告！</strong>{{ msg }}
+                </div>
+            {% endif %}
+            <div class="form-group">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" value="remember-me">
+                  记住密码
+                </label>
+              </div>
+            </div>
+            
+            <input class="btn btn-primary btn-block" type="submit" value="登录">
+              
+        </form>
+          <div class="text-center">
+            <a class="d-block small mt-3" href="#">注册</a>
+            <a class="d-block small" href="#">忘记密码?</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  </body>
+
+</html>
+```
+`<form method="post" action="{% url 'user_login' %}">`
+表单的提交方法method、 action 指定提交的url
+`{% csrf_token %}` 防止csrf攻击 
+CSRF 攻击之所以能够成功，是因为黑客可以完全伪造用户的请求，该请求中所有的用户验证信息都是存在于 cookie 中，因此黑客可以在不知道这些验证信息的情况下直接利用用户自己的 cookie 来通过安全验证。要抵御 CSRF，关键在于在请求中放入黑客所不能伪造的信息，并且该信息不存在于 cookie 之中。可以在 HTTP 请求中以参数的形式加入一个随机产生的 token，并在服务器端建立一个拦截器来验证这个 token，如果请求中没有 token 或者 token 内容不正确，则认为可能是 CSRF 攻击而拒绝该请求。
+
+### 退出url
+```
+path('logout/',views.user_logout, name='user_logout'),
 ```
 
-### 登出模板
-
-如果打开登出网址（http://127.0.0.1:8000/accounts/logout/），那么会看到一些奇怪的行为 - 所属的用户肯定会被登出，但您将被带到管理员登出页面。这不是想要的，只是因为该页面上的登录链接，带到管理员登录屏幕（并且仅对具有is_staff权限的用户可用）。
-
-创建并打开 locallibrary/templates/registration/logged_out.html。将下面的文字，复制到文档中：
+### 退出view
 ```
-{% extends "base_generic.html" %}
-
-{% block content %}
-<p>Logged out!</p>  
-
-<a href="{% url 'login'%}">Click here to login again.</a>
-{% endblock %}
+def user_logout(request):
+    logout(request)
+    return redirect('user_login')
 ```
 
-### 密码重置
-http://127.0.0.1:8000/accounts/password_change/
-创建模板 locallibrary/templates/registration/password_change_form.html
-
+### 修改base.html
 ```
-{% extends "base_generic.html" %}
-{% load i18n static %}
-
-
-{% block content %}<div id="content-main">
-
-<form method="post">{% csrf_token %}
-<div>
-{% if form.errors %}
-    <p>
-    {% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
-    </p>
-{% endif %}
-
-
-<p>{% trans "Please enter your old password, for security's sake, and then enter your new password twice so we can verify you typed it in correctly." %}</p>
-
-
-
-<div >
-    {{ form.old_password.errors }}
-    {{ form.old_password.label_tag }} {{ form.old_password }}
-</div>
-
-<div>
-    {{ form.new_password1.errors }}
-    {{ form.new_password1.label_tag }} {{ form.new_password1 }}
-    {% if form.new_password1.help_text %}
-    <div class="help">{{ form.new_password1.help_text|safe }}</div>
-    {% endif %}
-</div>
-
-<div>
-{{ form.new_password2.errors }}
-    {{ form.new_password2.label_tag }} {{ form.new_password2 }}
-    {% if form.new_password2.help_text %}
-    <div class="help">{{ form.new_password2.help_text|safe }}</div>
-    {% endif %}
-</div>
-
-
-<div>
-    <input type="submit" value="{% trans 'Change my password' %}"/>
-</div>
-
-</div>
-</form></div>
-
-{% endblock %}
-
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">退出</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">退出当前用户</div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+            <a class="btn btn-primary" href="{% url "user_logout" %}">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
 ```
 
-创建模板locallibrary/templates/registration/password_change_done.html
-```
-{% extends "base_generic.html" %}
+设置退出url`<a class="btn btn-primary" href="{% url "user_logout" %}">Logout</a>`
 
-{% load i18n %}
-{% block content %}
-
-<p>{% trans 'Your password was changed.' %}</p>
-{% endblock %}
-```
-
-## 验证已登录的用户
-
-本节介绍如何根据用户是否登录，来有选择地控制用户看到的内容
-
-### 模板
-
-可以使用`{{ user }}`模板变量，以获取有关模板中，当前登录用户的信息（默认情况下，在我们在骨架中设置项目时，会将其添加到模板上下文中）。
-
-通常，您将首先针对`{ user.is_authenticated }}`板变量进行测试，以确定用户是否有资格查看特定内容。为了证明这一点，接下来我们将更新侧边栏以在用户未登录时显示“登录”链接，如果他们已登录则显示“退出”链接。
-
-打开基本模板（/locallibrary/catalog/templates/base_generic.html）并将以下文本复制到侧边栏块中，紧接在endblock模板标记之前
-
-```
-<ul class="sidebar-nav">
-
-    ...
-
-   {% if user.is_authenticated %}
-     <li>User: {{ user.get_username }}</li>
-     <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
-   {% else %}
-     <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
-   {% endif %} 
-  </ul>
-```
-打开页面查看http://127.0.0.1:8000/catalog/
-
-我们使用if-else-endif模板标签根据`{{ user.is_authenticated }}`是否为true来有条件地显示文本。如果用户已通过身份验证，那么我们知道我们拥有有效用户，因此我们会调用`{{ user.get_username }}`来显示其名称。
-
-我们使用url模板标记和相应URL配置的名称创建登录和退出URL。另请注意我们如何将“next = \ {{ request.path }}附加到URL的末尾。这样做是将包含当前页面地址（URL）的URL参数添加到链接URL的末尾。用户成功登录/注销后，视图将使用此“next”将用户重定向回他们首次单击登录/注销链接的页面
-
-### 视图
-
-如果你正在使用基于函数的视图，则限制对函数的访问的最简单方法是将login_required装饰器应用于您的视图函数，如下所示。如果用户已登录，则您的视图代码将正常执行。
-
+### 添加检查是否登录
+先导入要是的装饰器和类，在需要验证的地方添加
 ```
 from django.contrib.auth.decorators import login_required
-
-@login_required
-def my_view(request):
-```
-在基于类的视图中限制对登录用户的访问的最简单方法是从LoginRequiredMixin派生。需要在主视图类之前的超类列表中首先声明此mixin。
-
-```
 from django.contrib.auth.mixins import LoginRequiredMixin
+@login_required
+def index(request):
+...
+...
 
-class MyView(LoginRequiredMixin, View):
-    ...
-```
-我们将现有的视图加上登录验证
-## 列出当前用户借阅的书
-让我创建一个页面展示用户借阅的书
-### 模板
-
-首先，我们必须让用户可以租借BookInstance（我们已经拥有状态和due_back日期，但我们在这个模型和用户之间没有任何关联。我们将创建一个使用ForeignKey（一对多）字段。我们还需要一个简单的机制来测试借出的书是否过期。
-
-打开catalog/models.py，然后从django.contrib.auth.models导入User模型（在文件顶部的上一个导入行的正下方添加它，因此用户可以使用后续代码）：
-
-```
-from django.contrib.auth.models import User
+class BookListView(LoginRequiredMixin, generic.ListView):
 ```
 
-接下来将借用者字段borrower，添加到BookInstance模型：
+再次刷新http://127.0.0.1:8000/catalog/ 404默认重定向到
 
-```
-borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-```
+http://127.0.0.1:8000/accounts/login/?next=/catalog/
 
-当我们在这里时，让我们添加一个属性，我们可以从模板中调用它来判断特定的书籍实例是否过期。添加在BookInstance 底部
+设置默认重定向配置
+修改settings.py
 ```
-from datetime import date  #这行放到文件头部
-
-@property
-def is_overdue(self):
-    if self.due_back and date.today() > self.due_back:
-        return True
-    return False
+LOGIN_URL='/catalog/login/'
 ```
 
-现在我们已经更新了模型，我们需要对项目进行新的迁移，然后应用这些迁移：
+### 权限控制
+
+查看用户权限
 ```
-python manage.py makemigrations
-python manage.py migrate
+>>> from django.contrib.auth.models import User
+>>> user_obj = User.objects.get(name='test')
+>>> user_obj = User.objects.get(username='test')
+>>> user_obj.get_all_permissions()
+{'catalog.view_book'}
 ```
-
-### djangoadmin
-
-现在打开 catalog/admin.py，并将borrower字段，添加到BookInstanceAdmin类别中的list_display和fieldsets，如下所示。这将使该字段在Admin部分中可见，以便我们可以在需要时将User分配给BookInstance。
-
+添加用户权限认证
 ```
-@admin.register(BookInstance)
-class BookInstanceAdmin(admin.ModelAdmin):
-    list_display = ('book', 'status', 'borrower', 'due_back', 'id')
-    list_filter = ('status', 'due_back')
-    
-    fieldsets = (
-        (None, {
-            'fields': ('book','imprint', 'id')
-        }),
-        ('Availability', {
-            'fields': ('status', 'due_back','borrower')
-        }),
-    )
-```
-
-### 借书
-
-现在可以将书本借给特定用户，然后借出一些BookInstance记录。将他们的借用字段borrowed，设置为您的测试用户，将状态status设置为 “On loan”，并在设置截止日期。
-
-### 已借书视图
-
-现在我们将添加一个视图，以获取已经借给当前用户的所有书本列表。我们将使用我们熟悉的、基于类的通用类列表视图，但这次我们还将导入并派生自LoginRequiredMixin，以便只有登录用户才能调用此视图。我们还将选择声明template_name，而不是使用默认值
-将以下内容添加到 catalog/views.py：
-
-```
-class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
+@login_required
+def index(request):
     """
-    Generic class-based view listing books on loan to current user. 
+    首页视图
     """
-    model = BookInstance
-    template_name ='catalog/bookinstance_list_borrowed_user.html'
-    paginate_by = 10
-    
-    def get_queryset(self):
-        return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
+    # 判断权限
+    if not request.user.has_perm('catalog.view_book'):
+        return HttpResponse("no permession")
 ```
 
-为了将查询，限制为当前用户的BookInstance对象，我们重新实现了get_queryset()，如上所示。请注意，“o”是表示借出当中“on loan”的存储代码，我们按due_back日期排序.
+## 新建book表单
 
-### url 
-catalog/urls.py
+新建表单功能
+###
+
+url配置
+```
+ path('books/create', views.book_create, name='book_create'),
+```
+
+
+view视图
+```
+def book_create(request):
+    if request.method == "GET":
+        authors = Author.objects.all()
+        genres = Genre.objects.all()
+        context = {"authors": authors, "genres": genres}
+        return render(request, "book_create.html",context)
+    if request.method == "POST":
+        book_title = request.POST.get("book_title")
+        book_author_id = request.POST.get("book_author")
+        book_summary = request.POST.get("book_summary")
+        book_isbn = request.POST.get("book_isbn")
+        book_genre_ids = request.POST.getlist("book_genre")
+        book_author = Author.objects.get(id = book_author_id)
+        book = Book(title=book_title, author=book_author, summary=book_summary, isbn=book_isbn)
+        book.save()
+        for book_genre_id in  book_genre_ids:
+            book_genre = Genre.objects.get(id = book_genre_id)
+            book.genre.add(book_genre)
+        book.save()
+        #return HttpResponse(book_genre_ids)
+        return redirect('books')
+```
+book 表单模板
 
 ```
-path('mybooks/', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),
-```
+{% extends 'base.html' %} {% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
 
-### 模板
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">图书</a>
+                </li>
+                {% if object %}
+                <li class="breadcrumb-item active">图书编辑</li>
+                {% else %}
+                <li class="breadcrumb-item active">新建图书</li>
+                {% endif %}
+            </ol>
+            <div class="panel-body">
+                <div class="col-lg-6">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>名称</label>
+                            <input class="form-control" name="book_title" required="required">
+                        </div>
+                        <div class="form-group">
+                            <label>作者</label>
+                            <select class="form-control" name="book_author" id="id_book_author">
+                                {% for author in authors %}
+                                <option value="{{ author.id }}">{{ author }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>概述</label>
+                            <textarea class="form-control" rows="5" name="book_summary" required="required"></textarea>
+                        </div>
 
-现在，我们需要为此页面添加一个模板。首先，创建模板文件catalog/templates/catalog/bookinstance_list_borrowed_user.html，并为其提供以下内容
-```
-{% extends "base_generic.html" %}
+                        <div class="form-group">
+                            <label>ISBN</label>
+                            <input class="form-control" name="book_isbn" required="required">
+                        </div>
 
-{% block content %}
-    <h1>Borrowed books</h1>
-
-    {% if bookinstance_list %}
-    <ul>
-
-      {% for bookinst in bookinstance_list %} 
-      <li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
-        <a href="{% url 'book-detail' bookinst.book.pk %}">{{bookinst.book.title}}</a> ({{ bookinst.due_back }})        
-      </li>
-      {% endfor %}
-    </ul>
-
-    {% else %}
-      <p>There are no books borrowed.</p>
-    {% endif %}       
+                        <div class="form-group">
+                            <label>类别</label>
+                            <select class="form-control" name="book_genre" id="id_book_genre" multiple>
+                                {% for genre in genres %}
+                                <option value="{{ genre.id }}">{{ genre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">提交</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.col-lg-6 -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
 {% endblock %}
 ```
-### 更新侧栏
-
-最后一步，是将这个新页面的链接，添加到侧边栏中。我们将把它放在我们为登录用户显示其他信息的同一部分。
-打开基本模板（locallibrary/catalog/templates/base_generic.html），如下所示。
-```
-<ul class="sidebar-nav">
-   {% if user.is_authenticated %}
-   <li>User: {{ user.get_username }}</li>
-   <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
-   <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
-   {% else %}
-   <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
-   {% endif %} 
- </ul>
-```
-
-## 权限
-
-在本文前面，我们向您展示了，如何为当前用户创建一个页面，列出他们借用的书本。现在的挑战，是创建一个只对图书馆员可见的类似页面，它显示所有借用的书本，其中包括每个借用人的名字。
-判断是否管理员：
-模板使用 user.is_staff
-视图使用 @staff_member_required
-url catalog/borrowed
-
-
-### 视图
-
-现在我们将添加一个视图，以获取已经借出所有书本列表。我们将使用我们熟悉的、基于类的通用类列表视图，但这次我们还将导入PermissionRequiredMixin，以便只有管理员才能调用此视图。我们还将选择声明template_name，而不是使用默认值
-将以下内容添加到 catalog/views.py：
+添加新建book入口,修改book_list.html
 
 ```
-class BorrowedAllBookListView(PermissionRequiredMixin, generic.ListView):
-    model = BookInstance
-    template_name ='catalog/bookinstance_list_borrowed_admin.html'
-    permission_required = ('catalog.can_mark_returned', 'catalog.can_edit')
-    paginate_by = 10
-
-    def get_queryset(self):
-        return BookInstance.objects.filter(status__exact='o').order_by('due_back')
-```
-
-使用permission_required字段指定需要的权限
-
-### url
-```
-path('borrowed/', views.BorrowedAllBookListView.as_view(), name='admin-borrowed'),
-```
-
-### 模板
-现在，我们需要为此页面添加一个模板。首先，创建模板文件catalog/templates/catalog/bookinstance_list_borrowed_admin.html，并为其提供以下内容
-
-```
-{% extends "base_generic.html" %}
+{% extends "base.html" %}
 
 {% block content %}
-    <h1>Borrowed books</h1>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="#">图书列表</a>
+        </li>
+    </ol>
+    <div class="mb-2">
+        <button onclick="location.href='{% url 'book_create'  %}'" type="button" class="btn btn-primary btn-xs">新建book</button>
+    </div>
+...
+...
+```
 
-    {% if bookinstance_list %}
-    <ul>
+### 编辑book
+修改已创建的图书内容
 
-      {% for bookinst in bookinstance_list %} 
-      <li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
-        <a href="{% url 'book-detail' bookinst.book.pk %}">{{bookinst.book.title}}</a> ({{ bookinst.due_back }}) borrower {{ bookinst.borrower}}    
-      </li>
-      {% endfor %}
-    </ul>
+### url 设置
+```
+path('book/<int:pk>/edit', views.book_edit, name='book_edit'),
+```
 
-    {% else %}
-      <p>There are no books borrowed.</p>
-    {% endif %}       
+### 修改book_list 添加编辑选项
+```
+<td><a href="{% url 'book_edit' book.id %}">编辑</td>
+```
+
+### 修改view
+```
+def book_edit(request, pk):
+    if request.method == "GET":
+        return HttpResponse(pk)
+```
+
+### 编辑表单
+```
+{% extends 'base.html' %} {% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">图书</a>
+                </li>
+                <li class="breadcrumb-item active">图书编辑</li>
+            </ol>
+            <div class="panel-body">
+                <div class="col-lg-6">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>名称</label>
+                            <input class="form-control" name="book_title" required="required" value="{{ book.title }}">
+                        </div>
+                        <div class="form-group">
+                            <label>作者</label>
+                            <select class="form-control" name="book_author" id="id_book_author">
+                                {% for author in authors %}
+                                <option value="{{ author.id }}">{{ author }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>概述</label>
+                            <textarea class="form-control" rows="5" name="book_summary" required="required">{{ book.summary }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>ISBN</label>
+                            <input class="form-control" name="book_isbn" required="required" value="{{ book.isbn }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>类别</label>
+                            <select class="form-control" name="book_genre" id="id_book_genre" multiple>
+                                {% for genre in genres %}
+                                <option value="{{ genre.id }}">{{ genre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">提交</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.col-lg-6 -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<script>
+    
+        var e = document.getElementById("id_book_author")
+        var optionsText="{{ book.author }}"
+        for(var i=0;i<e.options.length;i++){
+            if(e.options[i].text==optionsText){
+                e.options[i].selected=true;
+            }
+        }
+        var e = document.getElementById("id_book_genre")
+        var optionsText="{% for genre in book.genre.all %} {{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+        for(var i=0;i<e.options.length;i++){
+            if(optionsText.includes(e.options[i].text)){
+                e.options[i].selected=true;
+            }
+        }
+             
+    </script>
 {% endblock %}
 ```
 
-###  更新侧栏
-打开基本模板（locallibrary/catalog/templates/base_generic.html），如下所示。
-
+###再次编辑view
 ```
-          <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
-          {% if perms.catalog.can_mark_returned %}
-          <li><a href="{% url 'admin-borrowed' %}">admin Borrowed</a></li>
-          {% endif %}
+def book_edit(request, pk):
+    if request.method == "GET":
+        book = Book.objects.get(id = pk)
+        authors = Author.objects.all()
+        genres = Genre.objects.all()
+        context = { "book": book, "authors": authors, "genres": genres }
+        return render(request, "book_edit.html", context)
+    if  request.method == "POST":
+        book = Book.objects.get(id = pk)
+        book.title = request.POST.get("book_title")
+        book_author_id = request.POST.get("book_author")
+        book.summary = request.POST.get("book_summary")
+        book.isbn = request.POST.get("book_isbn")
+        book_genre_ids = request.POST.getlist("book_genre")
+        book.author = Author.objects.get(id = book_author_id)
+        book.genre.clear()
+        for book_genre_id in  book_genre_ids:
+            book_genre = Genre.objects.get(id = book_genre_id)
+            book.genre.add(book_genre)
+        book.save()
+        return redirect('books')
 ```
-

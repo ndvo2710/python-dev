@@ -7,8 +7,8 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('books/', views.BookListView.as_view(), name='books'),
     path('book/<int:pk>', views.BookDetailView.as_view(), name='book-detail'),
-    path('authors/', views.AuthorListView.as_view(), name='authors'),
-    path('author/<int:pk>', views.AuthorDetailView.as_view(), name='author-detail'),
-    path('mybooks/', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),
-    path('borrowed/', views.BorrowedAllBookListView.as_view(), name='admin-borrowed'),
+    path('login/',views.user_login, name='user_login'),
+    path('logout/',views.user_logout, name='user_logout'),
+    path('books/create', views.book_create, name='book_create'),
+    path('book/<int:pk>/edit', views.book_edit, name='book_edit'),
 ]
