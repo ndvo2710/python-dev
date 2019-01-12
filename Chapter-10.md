@@ -300,7 +300,6 @@ LOGIN_URL='/catalog/login/'
 查看用户权限
 ```
 >>> from django.contrib.auth.models import User
->>> user_obj = User.objects.get(name='test')
 >>> user_obj = User.objects.get(username='test')
 >>> user_obj.get_all_permissions()
 {'catalog.view_book'}
@@ -324,7 +323,7 @@ def index(request):
 
 url配置
 ```
- path('books/create', views.book_create, name='book_create'),
+path('books/create', views.book_create, name='book_create'),
 ```
 
 
@@ -364,11 +363,7 @@ book 表单模板
                 <li class="breadcrumb-item">
                     <a href="#">图书</a>
                 </li>
-                {% if object %}
-                <li class="breadcrumb-item active">图书编辑</li>
-                {% else %}
                 <li class="breadcrumb-item active">新建图书</li>
-                {% endif %}
             </ol>
             <div class="panel-body">
                 <div class="col-lg-6">
@@ -563,3 +558,7 @@ def book_edit(request, pk):
         book.save()
         return redirect('books')
 ```
+
+### 练习
+1. 菜单栏添加类别，作者列表
+2. 完成类别，作者的新建，与编辑
