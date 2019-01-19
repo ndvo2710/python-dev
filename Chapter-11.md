@@ -107,7 +107,7 @@ class TestClient(unittest.TestCase):
 * 真实对象具有不可确定的行为(产生不可预测的结果，如股票的行情)
 * 真实对象的某些行为很难触发(比如500错误)
 * 真实情况令程序的运行速度很慢
-* 被测试对象存在
+* 被测试对象不存在
 
 测试代码
 ```
@@ -159,6 +159,7 @@ print(visit_ustack())
 ### http mock service 工具
 
 Turq是一个小型HTTP服务器，可以使用基于Python的语言编写脚本。使用它来设置模拟HTTP资源，以响应您选择的status，header和body
+pip install turq
 
 启动turq
 `turq`
