@@ -9,8 +9,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 from django.views import generic
 
-from .models import Project, HttpApi, HttpRunResult
-import requests
+from .models import Project, HttpApi
 
 
 
@@ -147,8 +146,6 @@ def httpapi_create(request, pk):
         httpapi_requestheader = request.POST.get("httpapi_requestheader")
         httpapi_requestparametertype = request.POST.get("httpapi_requestparametertype")
         httpapi_requestbody = request.POST.get("httpapi_requestbody")
-        httpapi_assertType = request.POST.get("httpapi_asserttype")
-        httpapi_assertContent = request.POST.get("httpapi_assertcontent")
         userupdate= request.user
 
         httpapi = HttpApi(project=httpapi_project,
@@ -159,9 +156,7 @@ def httpapi_create(request, pk):
                           requestHeader=httpapi_requestheader,
                           requestBody=httpapi_requestbody,
                           userUpdate=userupdate,
-                          description=httpapi_description,
-                          assertType=httpapi_assertType,
-                          assertContent=httpapi_assertContent
+                          description=httpapi_description
                           )
         httpapi.save()
 
@@ -172,7 +167,7 @@ def httpapi_create(request, pk):
 def httpapi_list(request, pk):
     project = Project.objects.get(id=pk)
     
-    rs = HttpApi.objects.filter(project=project).order_by("-lastUpdateTime")
+    rs = HttpApi.objects.filter(project=project)
     paginator = Paginator(rs, 5)
     page = request.GET.get('page')
     httpapis = paginator.get_page(page)
@@ -195,94 +190,6 @@ def httpapi_edit(request, project_id, httpapi_id):
         httpapi.requestHeader = request.POST.get("httpapi_requestheader")
         httpapi.requestParameterType = request.POST.get("httpapi_requestparametertype")
         httpapi.requestBody = request.POST.get("httpapi_requestbody")
-        httpapi.assertType = request.POST.get("httpapi_asserttype")
-        httpapi.assertContent = request.POST.get("httpapi_assertcontent")
         httpapi.userUpdate= request.user
         httpapi.save()
         return redirect("httpapi_list",project.id)
-
-
-@login_required
-def httpapi_run(request, project_id, httpapi_id):
-    if request.method == "GET":
-        project = Project.objects.get(id=project_id)
-        httpapi = HttpApi.objects.get(project=project, id=httpapi_id)
-        response_header = ""
-        assertresult = ""
-        if httpapi.requestType == "GET":
-            data = {}
-            if httpapi.requestBody != "":
-                for line in httpapi.requestBody.strip().split("\n"):
-                    key,value = line.split("=")
-                    data[key] = value
-                    
-            r = requests.get(url=httpapi.apiurl,params=data)
-            for item in r.headers:
-                response_header += "%s: %s\n" % (item, r.headers.get(item))
-            if httpapi.assertType == "noselect":
-                assertresult = ""
-            elif httpapi.assertType == "in":
-                if httpai.assertContent.strip() in r.text:
-                    assertresult = "ok"
-                else:
-                    assertresult = "failed"
-            elif httpapi.assertType == "status_code":
-                if httpapi.assertContent.strip() == str(r.status_code):
-                    assertresult = "ok"
-                else:
-                    assertresult = "failed"
-        if httpapi.requestType == "POST":
-            request_header = {}
-            if httpapi.requestHeader != "":
-                for line in httpapi.requestHeader.strip().split("\n"):
-                    key,value = line.split("=")
-                    request_header[key] = value
-            if httpapi.requestParameterType == "form-data":
-                request_body = {}
-                for line in httpapi.requestBody.strip().split("\n"):
-                    key,value = line.split("=")
-                    request_body[key] = value
-                r = requests.post(url=httpapi.apiurl,data=request_body,headers=request_header)
-            elif httpapi.requestParameterType == "raw":
-                request_body = httpapi.requestBody.strip()
-                print(request_body)
-                r = requests.post(url=httpapi.apiurl,data=request_body,headers=request_header)
-            for item in r.headers:
-                response_header += "%s: %s\n" % (item, r.headers.get(item))
-            if httpapi.assertType == "noselect":
-                assertresult = ""
-            elif httpapi.assertType == "in":
-                if httpai.assertContent.strip() in r.text:
-                    assertresult = "ok"
-                else:
-                    assertresult = "failed"
-            elif httpapi.assertType == "status_code":
-                if httpapi.assertContent.strip() == str(r.status_code):
-                    assertresult = "ok"
-                else:
-                    assertresult = "failed"
-                      
-        httprunresult = HttpRunResult(httpapi=httpapi, 
-                                      response=r.text, 
-                                      header=response_header, 
-                                      statusCode = r.status_code,
-                                      assertResult = assertresult
-                                      )
-        httprunresult.save()
-        #return HttpResponse("result add ok")
-        return redirect("httpapi_result",project.id, httpapi.id)
-
-
-@login_required
-def httpapi_result(request, project_id, httpapi_id):
-    project = Project.objects.get(id=project_id)
-    httpapi = HttpApi.objects.get(project=project, id=httpapi_id)
-    try:
-        httpresult = HttpRunResult.objects.filter(httpapi=httpapi).order_by("-id")[0]
-    except:
-        return render(request,"project/httpapi_result.html", {"project": project})
-
-    return render(request,"project/httpapi_result.html",{"project": project, "object": httpresult })
-
-
-            

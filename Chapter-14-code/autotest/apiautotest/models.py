@@ -63,7 +63,7 @@ class HttpApi(models.Model):
 
 class HttpRunResult(models.Model):
     """
-    接口运行结果
+    接口测试结果
     """
     httpapi = models.ForeignKey(HttpApi, on_delete=models.CASCADE, verbose_name="所属接口")
     response = models.TextField(verbose_name="响应结果")
@@ -71,28 +71,7 @@ class HttpRunResult(models.Model):
     statusCode = models.IntegerField(verbose_name="状态码")
     assertResult = models.CharField(max_length=20, null=True, verbose_name="断言结果")
 
-    def __str__(self):
-        return self.httpapi.name
 
-class HttpTest(models.Model):
-    """
-    接口测试
-    """
-    name = models.CharField(max_length=50, verbose_name='接口测试名称')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='所属项目')
-    httpapis = models.CharField(max_length=50, verbose_name='包含http接口id')
 
-    def __str__(self):
-        return self.name
 
-class HttpTestResult(models.Model):
-    """
-    测试结果
-    """
-    httptest = models.ForeignKey(HttpTest, on_delete=models.CASCADE, verbose_name='测试')
-    httprunresults = models.CharField(max_length=50, verbose_name='运行结果id')
-    status = models.CharField(max_length=50, verbose_name='测试结果')
-
-    def __str__(self):
-        return self.httptest.name
 

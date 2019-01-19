@@ -18,6 +18,5 @@ urlpatterns = [
     path('project/<int:project_id>/test/create', views.test_create, name='test_create'),
     path('project/<int:project_id>/test/', views.test_list, name='test_list'),
     path('project/<int:project_id>/test/<int:test_id>/run', views.test_run, name='test_run'),
-    path('project/<int:project_id>/test/<int:test_id>/result', views.test_result, name='test_result'),
-    path('project/<int:project_id>/report', views.report_list, name='report_list')
+    path('project/<int:project_id>/test/<int:test_id>/result', views.test_result, name='test_result')
 ]

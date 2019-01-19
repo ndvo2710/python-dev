@@ -20,7 +20,14 @@ from .lib import utils
 
 @login_required
 def index(request):
-    return render(request,"index.html")
+    project_count = Project.objects.all().count()
+    httpapi_count = HttpApi.objects.all().count()
+    httptest_count = HttpTest.objects.all().count()
+    httptestresult_count = HttpTestResult.objects.all().count()
+    #return HttpResponse(project)
+    return render(request,"index.html", {"project": project_count, "httpapi": httpapi_count,
+    "httptest": httptest_count, "httptestresult": httptestresult_count})
+    
     
 
 def user_login(request):
@@ -357,11 +364,27 @@ def test_result(request, project_id, test_id):
     status = testresult.status
     httprunresult_ids = testresult.httprunresults.split(",")
     httprunresults = []
+    ok_count = 0
+    failed_count = 0
     for httprunresult_id in httprunresult_ids :
         httprunresult = HttpRunResult.objects.get(id=httprunresult_id)
         httprunresults.append(httprunresult)
+        if httprunresult.assertResult == "ok":
+            ok_count += 1
+        if httprunresult.assertResult == "failed":
+            failed_count += 1
 
-    return render(request,"project/test_result.html", {"project":project, "testresult":testresult, "objects": httprunresults })
+    return render(request,"project/test_result.html", {"project":project, "testresult":testresult, "objects": httprunresults, "ok": ok_count,"failed": failed_count })
 
+
+@login_required
+def report_list(request, project_id):
+    project = Project.objects.get(id=project_id)
+    try:
+        testresult = HttpTestResult.objects.filter(httptest__project=project).order_by("-id")
+    except Exception as e:
+        return render(request,"project/report_list.html", {"project":project})
+    
+    return render(request,"project/report_list.html", {"project":project,  "objects": testresult })
 
 

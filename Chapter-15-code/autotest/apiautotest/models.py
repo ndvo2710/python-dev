@@ -92,7 +92,6 @@ class HttpTestResult(models.Model):
     httptest = models.ForeignKey(HttpTest, on_delete=models.CASCADE, verbose_name='测试')
     httprunresults = models.CharField(max_length=50, verbose_name='运行结果id')
     status = models.CharField(max_length=50, verbose_name='测试结果')
-    runTime = models.DateTimeField(auto_now=True, verbose_name='运行日期')
 
     def __str__(self):
         return self.httptest.name
