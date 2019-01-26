@@ -6,7 +6,7 @@
 * 用例管理
 * 测试报告
 * 用户管理
-* dashboard
+* dashboard0p
 
 ### 创建项目框架
 
