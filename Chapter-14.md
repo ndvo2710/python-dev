@@ -325,6 +325,10 @@ def httpapi_run(request, project_id, httpapi_id):
                     key,value = line.split("=")
                     request_body[key] = value
                 r = requests.post(url=httpapi.apiurl,data=request_body,headers=request_header)
+            elif httpapi.requestParameterType == "raw":
+                request_body = httpapi.requestBody.strip()
+                print(request_body)
+                r = requests.post(url=httpapi.apiurl,data=request_body,headers=request_header)
             for item in r.headers:
                 response_header += "%s: %s\n" % (item, r.headers.get(item))
             if httpapi.assertType == "noselect":
