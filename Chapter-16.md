@@ -398,8 +398,7 @@ systemctl stop firewalld
 
 ### 安装nginx
 
-```
-vi  /etc/yum.repos.d/nginx.repo
+`vi  /etc/yum.repos.d/nginx.repo`
 
 # 粘贴一下内容
 
