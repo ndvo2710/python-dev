@@ -240,6 +240,7 @@ requirements.txt
 Django==2.0.5
 requests==2.18.4
 mysqlclient==1.3.12
+gunicorn==19.9.0
 ```
 
 ## 线上环境部署
@@ -258,17 +259,36 @@ centos 7
 
 
 ### 安装mysql
+数据库版本 django 2.0.*  mysql5.5
+          django 2.1.*  mysql5.6
 
+centos7
 ```
+cd /etc/yum.repos.d/
+rm -f ./*.repo
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+yum clean all
 yum install mariadb
-yum search mariadb-server
 yum install mariadb-devel
 #启动mysql-server
 systemctl start mariadb
 ```
 
+cetos6
+```
+cd /etc/yum.repos.d/
+rm -f ./*.repo
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo
+yum clean all
+yum install mysql
+yum install mysql-devel
+# 启动
+/etc/init.d/mysqld start
+```
+
 ### anacoda 
 一个python的发行版可快速在linux系统中配置python环境
+https://repo.anaconda.com/archive/
 
 安装anacod
 ```
@@ -324,6 +344,9 @@ cd /opt
 source env/bin/activate
 (env) [root@python-dev opt]#
 ```
+
+### 查看项目依赖模块版本
+`pip freeze`
 ### 安装依赖模块
 ```
 # 在env环境下进入代码目录
@@ -340,9 +363,11 @@ mysql -uroot -p
 create database autotest /*!40100 DEFAULT CHARACTER SET utf8 */;
 # 退出数据库
 quit
+```
 
-# 初始化书库表
-python manage.py  migrate
+初始化书库表
+
+`python manage.py  migrate`
 
 ### 启动django应用
 
@@ -355,22 +380,40 @@ nohup: ignoring input
 [2018-09-08 11:09:45 +0000] [14207] [INFO] Listening at: http://127.0.0.1:8000 (14207)
 [2018-09-08 11:09:45 +0000] [14207] [INFO] Using worker: sync
 [2018-09-08 11:09:45 +0000] [14210] [INFO] Booting worker with pid: 14210
+```
 
+
+### 启动nginx前提
+关闭iptables
+```
+# centos7
+systemctl stop firewalld
+# centos6
+/etc/init.d/iptables stop
 
 ```
+关闭selinux
+
+`setenforce 0`
+
 ### 安装nginx
 
 ```
 vi  /etc/yum.repos.d/nginx.repo
 
 # 粘贴一下内容
+
+```
 [nginx]
 name=nginx repo
 baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
 gpgcheck=0
 enabled=1
+```
 
 # 安装命令
+
+```
 yum install nginx
 systemctl start nginx
 ```
@@ -379,7 +422,6 @@ systemctl start nginx
 vi /etc/nginx/conf.d/default.conf
 
 ```
-
 server {
     listen       80;
     server_name  localhost;
@@ -431,7 +473,9 @@ server {
     #    deny  all;
     #}
 }
+```
+
 
 # reload
-nginx -s reload
-```
+`nginx -s reload`
+
