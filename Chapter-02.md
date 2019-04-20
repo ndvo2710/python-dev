@@ -37,41 +37,7 @@ if __name__ == "__main__":
 练习：取出n层嵌套列表里的所有元素
 提示判断一个元素i是否是list 使用isinstance(i,list)函数
 
-## 闭包
-````
-def npower():
-    n = 2
-    def  power(x):
-        return x ** n
-    return power
 
-if __name__ == "__main__":
-    f = npower()
-    print(f(2))
-    print(f(3))
-````
-
-在Python中创建一个闭包可以归结为以下三点
-+ 闭包函数必须有内嵌函数
-+ 内嵌函数需要引用该嵌套函数上一级命名空间中的变量
-+ 闭包函数必须返回内嵌函数
-在Python中，函数对象有一个__closure__属性，我们可以通过这个属性看看闭包的一些细节
-````
-def npower():
-    n = 2
-    def  power(x):
-        return x ** n
-    return power
-
-if __name__ == "__main__":
-    f = npower()
-    print(f(2))
-    print(f.__closure__)
-    print(f.__closure__[0].cell_contents)
-````
-从这里可以看到闭包的原理，当内嵌函数引用了包含它的函数（enclosing function）中的变量后，
-这些变量会被保存在闭包函数的__closure__属性中，成为闭包函数本身的一部分；
-也就是说，这些变量的生命周期会和闭包函数一样。
 
 ## 装饰器
 
@@ -79,7 +45,7 @@ if __name__ == "__main__":
 装饰器是可调用的对象，其参数是另一个函数（被装饰的函数），装饰器可以处理被装饰的函数，然后把它返回，
 也可以将其替换成另一个函数或可调用对象
 
-替换为另一个函数
+例子
 ````
 def deco(func):
     def inner():
@@ -120,7 +86,7 @@ if __name__ == "__main__":
 
 + 实质： 是一个函数
 + 参数：被装饰函数名
-+ 返回：返回一个函数（被装饰的函数或者另一个函数）
++ 返回：返回一个函数
 + 作用：为已经存在的对象添加额外的功能
 
 统计函数的执行时间
@@ -340,11 +306,250 @@ for dirpath, dirames, filenames  in os.walk("d:/py/peixun/python-dev"):
         print(os.path.join(dirpath, filename))
 ````
 
+
+
+
 ### 练习
 * 递归函数列出所有文件 使用os.listdir os.isfile
 * 练习找出单个目录中的最大文件
 * 练习找出目录树中的最大文件
 
 
-###  作业
+## 线程
+线程是中轻量级的进程，所有线程均在同一个进程中，共享全局内存，用于任务并行
+###  常见线程用法
+实例1 
+````buildoutcfg
+import threading
+import time
+
+
+def helloworld():
+    time.sleep(2)
+    print("helloworld")
+
+
+t = threading.Thread(target=helloworld)
+t.start()
+print("main thread")
+
+````
+注意：这里有两个线程一个是主线程，一个是通过threading模块产生的t线程，
+这里程序并没有阻塞在helloword函数，主线程和t线程并行运行
+
+
+实例2 同种任务并行
+
+````buildoutcfg
+import threading
+import time
+
+
+def helloworld(id):
+    time.sleep(2)
+    print("thread %d helloworld" % id)
+
+
+for i in range(5):
+    t = threading.Thread(target=helloworld, args=(i,))
+    t.start()
+print("main thread")
+````
+
+实例3 线程间同步
+
+````buildoutcfg
+import threading, time
+
+count = 0
+
+def adder():
+    global count
+    count = count + 1
+    time.sleep(0.5)
+    count = count + 1
+
+threads = []
+for i in range(10):
+    thread = threading.Thread(target=adder)
+    thread.start()
+    threads.append(thread)
+
+for thread in threads:
+    thread.join()
+
+print(count)
+````
+
+加锁
+````buildoutcfg
+import threading, time
+
+count = 0
+
+def adder(addlock):
+    global count
+    addlock.acquire()
+    count = count + 1
+    addlock.release()
+    time.sleep(0.1)
+    addlock.acquire()
+    count = count + 1
+    addlock.release()
+
+addlock = threading.Lock()
+threads = []
+for i in range(100):
+    thread = threading.Thread(target=adder,args=(addlock,))
+    thread.start()
+    threads.append(thread)
+
+for thread in threads:
+    thread.join()
+
+print(count)
+````
+使用with 加锁
+
+````buildoutcfg
+import threading, time
+
+count = 0
+
+def adder(addlock):
+    global count
+    with addlock:
+        count = count + 1
+    time.sleep(0.1)
+    with addlock:
+        count = count + 1
+
+addlock = threading.Lock()
+threads = []
+for i in range(100):
+    thread = threading.Thread(target=adder,args=(addlock,))
+    thread.start()
+    threads.append(thread)
+
+for thread in threads:
+    thread.join()
+
+print(count)
+````
+
+
+### queue 模块
+
+实际上带有线程的程序通常由一系列生产者和消费者组成，它们通过将数据存入一个共享队列中或者从中取出来进行通信。
+
+````buildoutcfg
+import threading, queue
+import time
+
+
+numconsumers = 20
+numproducers = 20
+nummessages = 4
+
+lock = threading.Lock()
+dataQueue = queue.Queue()
+
+
+def producer(idnum):
+    for msgnum in range(nummessages):
+        dataQueue.put("producer id=%d, count=%d" % (idnum, msgnum))
+
+
+def consumer(idnum):
+    while True:
+        data = dataQueue.get()
+        with lock:
+            print("consumer", idnum, "got => ", data)
+        time.sleep(0.1)
+        dataQueue.task_done()
+
+if __name__ == "__main__":
+    consumerThreads = []
+    producerThreads = []
+    for i in  range(numproducers):
+        t = threading.Thread(target=producer, args=(i,))
+        producerThreads.append(t)
+        t.start()
+    for i in range(numconsumers):
+        t = threading.Thread(target=consumer, args=(i,))
+        t.daemon=True
+        consumerThreads.append(t)
+        t.start()
+
+    dataQueue.join()
+````
+
+
+练习: 使用多线程写一个并发http，get请求的程序，
+可设置并发数和请求总数，返回请求状态码
+## 多进程
+###  multiprocessing  模块
+多进程模块
+````buildoutcfg
+import os
+
+from multiprocessing import Process, Lock
+
+def whoami(label, lock):
+    msg = '%s: name:%s, pid:%s'
+    with lock:
+        print(msg % (label, __name__,os.getpid()))
+
+
+if __name__ == '__main__':
+    lock = Lock()
+
+    for i in range(5):
+        p = Process(target=whoami, args=('child', lock))
+        p.start()
+````
+
+
+队列
+
+
+
+
+进程池
+```
+from multiprocessing import Pool
+import time
+
+def func(num):
+    print("hello world %d" % num)
+    time.sleep(3)
+    
+
+if __name__ == '__main__':
+   
+    pool = Pool(processes=4)
+    
+    for i in range(100):
+        pool.apply_async(func, (i,))
+    pool.close()
+    pool.join()
+    
+
+```
+pool.map
+
+```
+from multiprocessing import Pool
+import time
+def f(x):
+    time.sleep(0.5)
+    return x*x
+
+if __name__ == '__main__':
+    with Pool(5) as p:
+        print(p.map(f, range(10)))
+```
+
+##作业
 复制目录数,拷贝目录a到a.bak
+使用多进程写一个并发http，get请求的程序， 可设置并发数和请求总数，返回请求状态码
