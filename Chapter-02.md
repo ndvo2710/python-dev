@@ -512,7 +512,54 @@ if __name__ == '__main__':
 
 队列
 
+```
+from multiprocessing import Process, Queue, Lock
+import time
 
+numconsumers = 20
+numproducers = 20
+nummessages = 4
+
+
+
+
+def producer(idnum,dataQueue):
+    for msgnum in range(nummessages):
+        dataQueue.put("producer id=%d, count=%d" % (idnum, msgnum))
+
+
+def consumer(idnum,dataQueue,lock):
+    while True:
+        if dataQueue.empty():
+            break
+        data = dataQueue.get()
+        with lock:
+            print("consumer", idnum, "got => ", data)
+        time.sleep(0.1)
+
+
+if __name__ == "__main__":
+    lock = Lock()
+    dataQueue = Queue()
+    consumers = []
+    producers = []
+    for i in range(numproducers):
+        p = Process(target=producer, args=(i,dataQueue))
+        producers.append(p)
+        p.daemon=True
+        p.start()
+    for i in range(numconsumers):
+        p = Process(target=consumer, args=(i,dataQueue,lock))
+        consumers.append(p)
+        p.daemon=True
+        p.start()
+
+    for p in consumers:
+        p.join()
+    for p in producers:
+        p.join()
+
+```
 
 
 进程池
