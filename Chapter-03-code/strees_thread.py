@@ -14,8 +14,11 @@ result = {}
 
 
 def get_content(url):
-    while not q.empty():
-        q.get(block=False)
+    while True:
+        try:
+            q.get(block=False)
+        except queue.Empty:
+            break
         r = requests.get(url)
         with lock:
             try:

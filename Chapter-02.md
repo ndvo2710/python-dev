@@ -462,11 +462,15 @@ def producer(idnum):
 
 def consumer(idnum):
     while True:
-        data = dataQueue.get()
+        try:
+            data = dataQueue.get(block=False)
+        except queue.Empty:
+            break
         with lock:
             print("consumer", idnum, "got => ", data)
         time.sleep(0.1)
         dataQueue.task_done()
+
 
 if __name__ == "__main__":
     consumerThreads = []
@@ -514,6 +518,7 @@ if __name__ == '__main__':
 
 ```
 from multiprocessing import Process, Queue, Lock
+import queue
 import time
 
 numconsumers = 20
@@ -530,9 +535,10 @@ def producer(idnum,dataQueue):
 
 def consumer(idnum,dataQueue,lock):
     while True:
-        if dataQueue.empty():
+        try:
+            data = dataQueue.get(block=False)
+        except queue.Empty:
             break
-        data = dataQueue.get()
         with lock:
             print("consumer", idnum, "got => ", data)
         time.sleep(0.1)
