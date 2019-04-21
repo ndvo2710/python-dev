@@ -466,7 +466,6 @@ if __name__ == "__main__":
         t.start()
     for i in range(numconsumers):
         t = threading.Thread(target=consumer, args=(i,))
-        t.daemon=True
         consumerThreads.append(t)
         t.start()
 
