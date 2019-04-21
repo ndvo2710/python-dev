@@ -110,21 +110,6 @@ def func():
 func()
 ````
 
-返回函数被装饰的函数
-````
-def add_decorator(f):
-    print("加法")
-    return f
-
-@add_decorator
-def add_method(x, y):
-    return x + y
-
-
-print(add_method(2,3))
-
-````
-
 调用被装饰函数时,参数传递给返回的函数，所以wrap的参数要与被装饰函数一致，或者写成wrap(*arg, **dict)
 ````
 def add_decorator(f):
