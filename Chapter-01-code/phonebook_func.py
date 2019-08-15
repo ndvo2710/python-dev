@@ -1,6 +1,6 @@
 """
-龙腾测试dev课程，通讯录程序
-实现一个简单的通讯录，包含增删改查
+Advanded Python Course.
+Address book program
 """
 record_list = []
 record_id = 0
